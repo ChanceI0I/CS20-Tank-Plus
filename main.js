@@ -1,7 +1,7 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-// const obj = [];
+
 // const dynamicObj = [];
 
 const box1 = {
@@ -9,17 +9,31 @@ const box1 = {
     y : 100,
     w : 20,
     h : 10,
-    c : "black",
+    c : "green",
     s : 1,
-    // type : "dynamic",
 
     movement : '',
+}
+
+const Obstacle1 = {
+    x : 200, 
+    y : 200,
+    w : 50,
+    h : 30,
+    c : "red",
+}
+
+const Obstacle2 = {
+    x : 20, 
+    y : 350,
+    w : 30,
+    h : 40,
+    c : "red",
 }
 
 /** Clear Whole Canvas */
 function clearCanvas(){
     ctx.clearRect(0,0,canvas.width, canvas.height)
-    // console.log("CLEAR")
 }
 
 // addEventListener('keypress', function(event){
@@ -43,62 +57,118 @@ function clearCanvas(){
 //     }
 // })
 
-document.addEventListener('keypress', function(event){
-    if(event.key == 'w'){
-        // box1.y -= box1.s;
-        box1.movement = 'up';
-    } else if (event.key == 'a'){
-        // box1.x -= box1.s;
-        box1.movement = 'left';
-    } else if (event.key == 's'){
-        // box1.y += box1.s;
-        box1.movement = 'down';
-    } else if (event.key == 'd'){
-        // box1.x += box1.s;
-        box1.movement = 'right';
-    } else {
-        // console.log("no key pressed")
-        // box1.movement = '';
-    }
-})
-
-document.addEventListener('keyup', function(){
-    console.log('no key')
-    box1.movement = '';
-})
 
 
-function playerMovement(object) {
+function addMovingEvent(object_ME){
+
+    document.addEventListener('keypress', function(event){
+        if(event.key == 'w'){
+            object_ME.movement = 'up';
+        } else if (event.key == 'a'){
+            object_ME.movement = 'left';
+        } else if (event.key == 's'){
+            object_ME.movement = 'down';
+        } else if (event.key == 'd'){
+            object_ME.movement = 'right';
+        }
+    })
     
-    switch(object.movement){
+    document.addEventListener('keyup', function(){
+        object_ME.movement = '';
+    })
+
+}
+
+function drawRect(obj_DR){
+    ctx.fillStyle = obj_DR.c;
+    ctx.fillRect(obj_DR.x,obj_DR.y,obj_DR.w,obj_DR.h);
+    
+}
+
+
+
+function playerMovement(object_PM) {
+
+    addMovingEvent(object_PM);
+    drawRect(object_PM);
+
+    switch(object_PM.movement){
         case 'up':
-            object.y -= object.s;
+            object_PM.y -= object_PM.s;
             break
         case 'left':
-            object.x -= object.s;
+            object_PM.x -= object_PM.s;
             break
         case 'down':
-            object.y += object.s;
+            object_PM.y += object_PM.s;
             break
         case 'right':
-            object.x += object.s;
+            object_PM.x += object_PM.s;
             break
     }
 }
 
-function drawObj(obj){
-    ctx.fillRect(obj.x,obj.y,obj.w,obj.h);
-    ctx.fillStyle = obj.c;
+
+
+function collisionDetect(object, target){
+    let objectX = object.x + object.w
+    console.log("checking")
+    let WASD = [true, true, true, true];
+    for(let i of target){
+        console.log(object.x, i[0][0])
+        switch(object){
+            
+            case (object.x >= i[0][0]) && ((object.y >= i[1][0]) && (object.y <= i[1][1])):
+                console.log("NO MOVING RIGHT!!!")
+                break
+            case (object.x >= i[0][0]):
+                console.log("object.x >= i[0][0]")
+        }
+    }
 }
 
+function solidTarget(object_ST){
+    let targetHitBox_X = [];
+    let targetHitBox_Y = [];
+    
+    targetHitBox_X.push(object_ST.x, object_ST.x + object_ST.w);
+    targetHitBox_Y.push(object_ST.y, object_ST.y + object_ST.h);
+
+    return [targetHitBox_X, targetHitBox_Y]
+}
+
+let world = []
+world.push(solidTarget(Obstacle1))
+world.push(solidTarget(Obstacle2))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function draw(){
-    // console.log("draw")
     clearCanvas()
 
+    collisionDetect(box1, world)
+
+    drawRect(Obstacle1);
+    drawRect(Obstacle2);
     playerMovement(box1);
-    drawObj(box1);
     
-    // box1.x += 1
+
+    
+
+
+
+
 
     requestAnimationFrame(draw)
 }
