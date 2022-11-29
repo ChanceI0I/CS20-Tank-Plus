@@ -137,6 +137,11 @@ function solidTarget(object_ST){
     return [targetHitBox_X, targetHitBox_Y]
 }
 
+function showInfo(x,y,info){
+    console.log("showInfo")
+    ctx.fillText(String(info), x, y)
+}
+
 let world = []
 world.push(solidTarget(Obstacle1))
 world.push(solidTarget(Obstacle2))
@@ -156,6 +161,7 @@ world.push(solidTarget(Obstacle2))
 
 function draw(){
     clearCanvas()
+    console.log("!")
 
     collisionDetect(box1, world)
 
@@ -163,7 +169,8 @@ function draw(){
     drawRect(Obstacle2);
     playerMovement(box1);
     
-
+    
+    showInfo(370,10,`X: ${box1.x}; Y: ${box1.y}`)
     
 
 
