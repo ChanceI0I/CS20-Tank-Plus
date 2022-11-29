@@ -111,19 +111,12 @@ function playerMovement(object_PM) {
 
 
 function collisionDetect(object, target){
-    let objectX = object.x + object.w
-    console.log("checking")
+    let ObjBorder = getHitBox(object);
+    let TargetBorder = getHitBox(target);
     let WASD = [true, true, true, true];
-    for(let i of target){
-        console.log(object.x, i[0][0])
-        switch(object){
-            
-            case (object.x >= i[0][0]) && ((object.y >= i[1][0]) && (object.y <= i[1][1])):
-                console.log("NO MOVING RIGHT!!!")
-                break
-            case (object.x >= i[0][0]):
-                console.log("object.x >= i[0][0]")
-        }
+    
+    for(let x in ObjBorder){
+        // console.log(ObjBorder[x])
     }
 }
 
@@ -137,8 +130,18 @@ function solidTarget(object_ST){
     return [targetHitBox_X, targetHitBox_Y]
 }
 
+function getHitBox(object){
+     //[[ax,ay], [bx,by], [cx,cy], [dx,dy]]
+    let A = [object.x, object.y];
+    let B = [object.x + object.w, object.y];
+    let C = [object.x, object.y + object.h];
+    let D = [object.x + object.w, object.y + object.h];
+    let border = {'A': A, 'B': B, 'C' : C, 'D' : D}
+    return border
+}
+
 function showInfo(x,y,info){
-    console.log("showInfo")
+    
     ctx.fillText(String(info), x, y)
 }
 
@@ -151,8 +154,20 @@ world.push(solidTarget(Obstacle2))
 
 
 
+const array1= [1,2,3];
+const array2= [4,5,6,7,8,9,33,2] 
+      
 
-
+function findCommon(arr1, arr2) {
+    function check(value){
+        if(arr2.includes(value)){
+            return value
+        }
+    }
+    // return arr1.some(item => arr2.includes(item))
+    return arr1.some(check)
+}
+console.log(findCommon(array1, array2))
 
 
 
@@ -161,20 +176,18 @@ world.push(solidTarget(Obstacle2))
 
 function draw(){
     clearCanvas()
-    console.log("!")
 
-    collisionDetect(box1, world)
+    // collisionDetect(box1, world)
+    collisionDetect(box1, Obstacle1)
 
     drawRect(Obstacle1);
     drawRect(Obstacle2);
     playerMovement(box1);
     
     
-    showInfo(370,10,`X: ${box1.x}; Y: ${box1.y}`)
-    
-
-
-
+    showInfo(10,10,`Player --- ${getHitBox(box1).B}`)
+    showInfo(10,20,`Obs  1 --- ${getHitBox(Obstacle1).A}`)
+    showInfo(10,30,`Obs  2 --- ${getHitBox(Obstacle2)}`)
 
 
     requestAnimationFrame(draw)
