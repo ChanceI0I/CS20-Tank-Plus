@@ -9,7 +9,8 @@ const box1 = {
     y : 100,
     w : 20,
     h : 10,
-    c : "green",
+    a : 1,
+    c : `0,198,0`,
     s : 1,
 
     movement : '',
@@ -20,7 +21,8 @@ const Obstacle1 = {
     y : 200,
     w : 50,
     h : 30,
-    c : "red",
+    a : 1,
+    c : `198,0,0`,
 }
 
 const Obstacle2 = {
@@ -28,7 +30,8 @@ const Obstacle2 = {
     y : 350,
     w : 30,
     h : 40,
-    c : "red",
+    a : 1,
+    c : `198,0,0`,
 }
 
 /** Clear Whole Canvas */
@@ -59,51 +62,51 @@ function clearCanvas(){
 
 
 
-function addMovingEvent(object_ME){
+function addMovingEvent(object){
 
     document.addEventListener('keypress', function(event){
         if(event.key == 'w'){
-            object_ME.movement = 'up';
+            object.movement = 'up';
         } else if (event.key == 'a'){
-            object_ME.movement = 'left';
+            object.movement = 'left';
         } else if (event.key == 's'){
-            object_ME.movement = 'down';
+            object.movement = 'down';
         } else if (event.key == 'd'){
-            object_ME.movement = 'right';
+            object.movement = 'right';
         }
     })
     
     document.addEventListener('keyup', function(){
-        object_ME.movement = '';
+        object.movement = '';
     })
 
 }
 
-function drawRect(obj_DR){
-    ctx.fillStyle = obj_DR.c;
-    ctx.fillRect(obj_DR.x,obj_DR.y,obj_DR.w,obj_DR.h);
+function drawRect(object){
+    ctx.fillStyle = `rgb(${object.c}, ${object.a})`;
+    ctx.fillRect(object.x,object.y,object.w,object.h);
     
 }
 
 
 
-function playerMovement(object_PM) {
+function playerMovement(object) {
 
-    addMovingEvent(object_PM);
-    drawRect(object_PM);
+    addMovingEvent(object);
+    drawRect(object);
 
-    switch(object_PM.movement){
+    switch(object.movement){
         case 'up':
-            object_PM.y -= object_PM.s;
+            object.y -= object.s;
             break
         case 'left':
-            object_PM.x -= object_PM.s;
+            object.x -= object.s;
             break
         case 'down':
-            object_PM.y += object_PM.s;
+            object.y += object.s;
             break
         case 'right':
-            object_PM.x += object_PM.s;
+            object.x += object.s;
             break
     }
 }
@@ -120,30 +123,45 @@ function collisionDetect(object, target){
     }
 }
 
-function solidTarget(object_ST){
+function solidTarget(object){
     let targetHitBox_X = [];
     let targetHitBox_Y = [];
     
-    targetHitBox_X.push(object_ST.x, object_ST.x + object_ST.w);
-    targetHitBox_Y.push(object_ST.y, object_ST.y + object_ST.h);
+    targetHitBox_X.push(object.x, object.x + object.w);
+    targetHitBox_Y.push(object.y, object.y + object.h);
 
     return [targetHitBox_X, targetHitBox_Y]
 }
 
 function getHitBox(object){
-     //[[ax,ay], [bx,by], [cx,cy], [dx,dy]]
-    let A = [object.x, object.y];
-    let B = [object.x + object.w, object.y];
-    let C = [object.x, object.y + object.h];
-    let D = [object.x + object.w, object.y + object.h];
-    let border = {'A': A, 'B': B, 'C' : C, 'D' : D}
+    //  //[[ax,ay], [bx,by], [cx,cy], [dx,dy]]
+    // let A = [object.x, object.y];
+    // let B = [object.x + object.w, object.y];
+    // let C = [object.x, object.y + object.h];
+    // let D = [object.x + object.w, object.y + object.h];
+    // let border = {'A': A, 'B': B, 'C' : C, 'D' : D}
+
+    // [[obj.x, obj.w] [obj.y, obj.h]]
+
+    let X = [], Y = [];
+    for(let i = object.x; i <= object.x + object.w; i++){
+        X.push(i)
+    }
+
+    for(let j = object.y; j <= object.y + object.h; j++){
+        Y.push(j)
+    }
+
+    let border = [X, Y]
     return border
 }
+
 
 function showInfo(x,y,info){
     
     ctx.fillText(String(info), x, y)
 }
+
 
 let world = []
 world.push(solidTarget(Obstacle1))
@@ -151,11 +169,23 @@ world.push(solidTarget(Obstacle2))
 
 
 
+function drawSaparatingAxes(object){
+    //ctx.fillRect(100, 5, 50, 5); y == 5 h == 5
+
+    //X
+    ctx.fillStyle = `rgb(${object.c}, 0.5)`;
+    ctx.fillRect(object.x, 5, object.w, 5);
+
+    //Y
+    ctx.fillStyle = `rgb(${object.c}, 0.5)`;
+    ctx.fillRect(390, object.y, 5, object.h);
+}
 
 
 
-const array1= [1,2,3];
-const array2= [4,5,6,7,8,9,33,2] 
+
+// const array1= [1,2,3];
+// const array2= [4,5,6,7,8,9,33,2] 
       
 
 function findCommon(arr1, arr2) {
@@ -164,19 +194,22 @@ function findCommon(arr1, arr2) {
             return value
         }
     }
-    // return arr1.some(item => arr2.includes(item))
     return arr1.some(check)
 }
-console.log(findCommon(array1, array2))
+// console.log(findCommon(array1, array2))
 
 
 
-
+console.log(getHitBox(box1))
 
 
 function draw(){
     clearCanvas()
 
+    drawSaparatingAxes(box1);
+    drawSaparatingAxes(Obstacle1);
+    drawSaparatingAxes(Obstacle2);
+    
     // collisionDetect(box1, world)
     collisionDetect(box1, Obstacle1)
 
@@ -185,9 +218,9 @@ function draw(){
     playerMovement(box1);
     
     
-    showInfo(10,10,`Player --- ${getHitBox(box1).B}`)
-    showInfo(10,20,`Obs  1 --- ${getHitBox(Obstacle1).A}`)
-    showInfo(10,30,`Obs  2 --- ${getHitBox(Obstacle2)}`)
+    // showInfo(10,10,`Player --- ${getHitBox(box1).B}`)
+    // showInfo(10,20,`Obs  1 --- ${getHitBox(Obstacle1).A}`)
+    // showInfo(10,30,`Obs  2 --- ${getHitBox(Obstacle2)}`)
 
 
     requestAnimationFrame(draw)
