@@ -112,16 +112,16 @@ function playerMovement(object) {
 }
 
 
-
+/**
+ * @param {Array} object X and Y HitBox of moving element
+ * @param {Array} target X and Y HitBox of obstacles
+ */
 function collisionDetect(object, target){
-    let ObjBorder = getHitBox(object);
-    let TargetBorder = getHitBox(target);
-    let WASD = [true, true, true, true];
-    
-    for(let x in ObjBorder){
-        // console.log(ObjBorder[x])
+    for(let obs of target){
+        
     }
 }
+
 
 function solidTarget(object){
     let targetHitBox_X = [];
@@ -180,7 +180,6 @@ function drawSaparatingAxes(object){
     ctx.fillStyle = `rgb(${object.c}, 0.5)`;
     ctx.fillRect(390, object.y, 5, object.h);
 }
-
 
 
 
