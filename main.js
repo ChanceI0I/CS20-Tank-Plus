@@ -9,11 +9,12 @@ const box1 = {
     y : 100,
     w : 20,
     h : 10,
-    a : 1,
-    c : `0,198,0`,
-    s : 1,
+    a : 1,  // Alpha
+    c : `0,198,0`,  // RGB
+    s : 1,  // Speed 
 
     movement : '',
+    moveable : {up : true, down : true, left : true, right: true},
 }
 
 const Obstacle1 = {
@@ -34,31 +35,21 @@ const Obstacle2 = {
     c : `198,0,0`,
 }
 
+const Obstacle3 = {
+    x : 50, 
+    y : 150,
+    w : 120,
+    h : 40,
+    a : 1,
+    c : `198,0,0`,
+}
+
+
+
 /** Clear Whole Canvas */
 function clearCanvas(){
     ctx.clearRect(0,0,canvas.width, canvas.height)
 }
-
-// addEventListener('keypress', function(event){
-//     switch(event.key){
-//         case 'w':
-//             box1.y -= box1.s;
-//             console.log('up');
-//             break
-//         case 'a':
-//             box1.x -= box1.s;
-//             console.log('left');
-//             break
-//         case 's':
-//             box1.y += box1.s;
-//             console.log('down');
-//             break
-//         case 'd':
-//             box1.x += box1.s;
-//             console.log('right');
-//             break
-//     }
-// })
 
 
 
@@ -97,41 +88,66 @@ function playerMovement(object) {
 
     switch(object.movement){
         case 'up':
-            object.y -= object.s;
+            if(object.moveable.up){object.y -= object.s}
             break
         case 'left':
-            object.x -= object.s;
+            if(object.moveable.left){object.x -= object.s}
             break
         case 'down':
-            object.y += object.s;
+            if(object.moveable.down){object.y += object.s}
             break
         case 'right':
-            object.x += object.s;
+            if(object.moveable.right)(object.x += object.s)
             break
     }
 }
 
 
 /**
- * @param {Array} object X and Y HitBox of moving element
+ * @param {object} object Moving object
  * @param {Array} target X and Y HitBox of obstacles
  */
 function collisionDetect(object, target){
-    for(let obs of target){
-        
+
+    let object_HB = getHitBox(object)
+
+    object.moveable = {up : true, down : true, left : true, right: true}
+    // const moveable = {up : true, down : true, left : true, right: true}; 
+
+    function GetLast(array){
+        let len = array.length;
+        return array[len-1]
     }
+
+    for(let obstacle of target){
+        if(findCommon(object_HB.y, obstacle.y)){
+            // console.log("Y axis contact")
+
+            if(GetLast(object_HB.x) === obstacle.x[0]){
+                // console.log("left contact")
+                object.moveable.right = false;
+            } else if(object_HB.x[0] === GetLast(obstacle.x)){
+                // console.log("Right contact")
+                object.moveable.left = false;
+            }
+        } 
+        
+        if(findCommon(object_HB.x, obstacle.x)){
+            // console.log("X axis contact")
+
+            if(GetLast(object_HB.y) === obstacle.y[0]){
+                // console.log("Top contact")
+                object.moveable.down = false;
+            } else if(object_HB.y[0] === GetLast(obstacle.y)){
+                // console.log("Bottom contact")
+                object.moveable.up = false;
+            }
+        }
+    }
+
+    return
 }
 
-
-function solidTarget(object){
-    let targetHitBox_X = [];
-    let targetHitBox_Y = [];
-    
-    targetHitBox_X.push(object.x, object.x + object.w);
-    targetHitBox_Y.push(object.y, object.y + object.h);
-
-    return [targetHitBox_X, targetHitBox_Y]
-}
 
 function getHitBox(object){
     //  //[[ax,ay], [bx,by], [cx,cy], [dx,dy]]
@@ -152,8 +168,9 @@ function getHitBox(object){
         Y.push(j)
     }
 
-    let border = [X, Y]
-    return border
+    // let border = [X, Y]
+    // return border
+    return {x : X, y : Y}
 }
 
 
@@ -163,9 +180,11 @@ function showInfo(x,y,info){
 }
 
 
+
 let world = []
-world.push(solidTarget(Obstacle1))
-world.push(solidTarget(Obstacle2))
+world.push(getHitBox(Obstacle1))
+world.push(getHitBox(Obstacle2))
+world.push(getHitBox(Obstacle3))
 
 
 
@@ -183,10 +202,6 @@ function drawSaparatingAxes(object){
 
 
 
-// const array1= [1,2,3];
-// const array2= [4,5,6,7,8,9,33,2] 
-      
-
 function findCommon(arr1, arr2) {
     function check(value){
         if(arr2.includes(value)){
@@ -195,32 +210,23 @@ function findCommon(arr1, arr2) {
     }
     return arr1.some(check)
 }
-// console.log(findCommon(array1, array2))
-
-
-
-console.log(getHitBox(box1))
 
 
 function draw(){
     clearCanvas()
 
-    drawSaparatingAxes(box1);
-    drawSaparatingAxes(Obstacle1);
-    drawSaparatingAxes(Obstacle2);
+    // drawSaparatingAxes(box1);
+    // drawSaparatingAxes(Obstacle1);
+    // drawSaparatingAxes(Obstacle2);
     
-    // collisionDetect(box1, world)
-    collisionDetect(box1, Obstacle1)
+    collisionDetect(box1, world)
 
     drawRect(Obstacle1);
     drawRect(Obstacle2);
+    drawRect(Obstacle3);
     playerMovement(box1);
     
     
-    // showInfo(10,10,`Player --- ${getHitBox(box1).B}`)
-    // showInfo(10,20,`Obs  1 --- ${getHitBox(Obstacle1).A}`)
-    // showInfo(10,30,`Obs  2 --- ${getHitBox(Obstacle2)}`)
-
 
     requestAnimationFrame(draw)
 }
