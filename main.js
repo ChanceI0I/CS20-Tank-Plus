@@ -102,6 +102,7 @@ function playerMovement(object) {
     }
 }
 
+// Change needed!!!!!  can't slide back to the edge of any obstacles
 
 /**
  * @param {object} object Moving object
