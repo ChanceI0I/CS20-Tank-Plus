@@ -105,9 +105,16 @@ function playerMovement(object) {
 
 /**
  * @param {object} object Moving object
- * @param {Array} target X and Y HitBox of obstacles
+ * @param {Array} target Obstacles array
  */
-function collisionDetect(object, target){
+function collisionDetect(object, obstacle){
+
+
+    let target = [];
+    for(let element of obstacle){
+        element = getHitBox(element);
+        target.push(element);
+    }
 
     let object_HB = getHitBox(object)
 
@@ -150,14 +157,6 @@ function collisionDetect(object, target){
 
 
 function getHitBox(object){
-    //  //[[ax,ay], [bx,by], [cx,cy], [dx,dy]]
-    // let A = [object.x, object.y];
-    // let B = [object.x + object.w, object.y];
-    // let C = [object.x, object.y + object.h];
-    // let D = [object.x + object.w, object.y + object.h];
-    // let border = {'A': A, 'B': B, 'C' : C, 'D' : D}
-
-    // [[obj.x, obj.w] [obj.y, obj.h]]
 
     let X = [], Y = [];
     for(let i = object.x; i <= object.x + object.w; i++){
@@ -182,9 +181,9 @@ function showInfo(x,y,info){
 
 
 let world = []
-world.push(getHitBox(Obstacle1))
-world.push(getHitBox(Obstacle2))
-world.push(getHitBox(Obstacle3))
+world.push(Obstacle1)
+world.push(Obstacle2)
+world.push(Obstacle3)
 
 
 
