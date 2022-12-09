@@ -7,11 +7,11 @@ const ctx = canvas.getContext("2d");
 const box1 = {
     x : 100, 
     y : 100,
-    w : 20,
-    h : 10,
+    w : 30,
+    h : 20,
     a : 1,  // Alpha
     c : `0,198,0`,  // RGB
-    s : 1,  // Speed 
+    s : 2.03333,  // Speed 
 
     movement : '',
     moveable : {up : true, down : true, left : true, right: true},
@@ -42,6 +42,42 @@ const Obstacle3 = {
     h : 40,
     a : 1,
     c : `198,0,0`,
+}
+
+const border_up = {
+    x : 0, 
+    y : 0,
+    w : canvas.width,
+    h : 5,
+    a : 1,
+    c : `41, 99, 194`,
+}
+
+const border_down = {
+    x : 0, 
+    y : canvas.height - 5,
+    w : canvas.width,
+    h : 5,
+    a : 1,
+    c : `41, 99, 194`,
+}
+
+const border_left = {
+    x : 0, 
+    y : 0,
+    w : 5,
+    h : canvas.height,
+    a : 1,
+    c : `41, 99, 194`,
+}
+
+const border_right = {
+    x : canvas.width - 5, 
+    y : 0,
+    w : 5,
+    h : canvas.height,
+    a : 1,
+    c : `41, 99, 194`,
 }
 
 
@@ -102,17 +138,16 @@ function playerMovement(object) {
     }
 }
 
-// Change needed!!!!!  can't slide back to the edge of any obstacles
 
 /**
  * @param {object} object Moving object
- * @param {Array} target Obstacles array
+ * @param {Array} target Obstacles object array
  */
-function collisionDetect(object, obstacle){
+function collisionDetect(object, obstacle_or){
 
 
     let target = [];
-    for(let element of obstacle){
+    for(let element of obstacle_or){
         element = getHitBox(element);
         target.push(element);
     }
@@ -128,25 +163,25 @@ function collisionDetect(object, obstacle){
     }
 
     for(let obstacle of target){
-        if(findCommon(object_HB.y, obstacle.y)){
-            // console.log("Y axis contact")
+        if(findCommon(object_HB.y, obstacle.y) && GetLast(object_HB.y) != obstacle.y[0] && GetLast(obstacle.y) != object_HB.y[0]){
+            console.log("Y axis contact") // not in corner
 
-            if(GetLast(object_HB.x) === obstacle.x[0]){
+            if(GetLast(object_HB.x) >= obstacle.x[0] && GetLast(object_HB.x) <= GetLast(obstacle.x)){
                 // console.log("left contact")
                 object.moveable.right = false;
-            } else if(object_HB.x[0] === GetLast(obstacle.x)){
+            } else if(object_HB.x[0] <= GetLast(obstacle.x) && object_HB.x[0] >= obstacle.x[0]){
                 // console.log("Right contact")
                 object.moveable.left = false;
             }
         } 
         
-        if(findCommon(object_HB.x, obstacle.x)){
-            // console.log("X axis contact")
+        if(findCommon(object_HB.x, obstacle.x) && GetLast(object_HB.x) != obstacle.x[0] && GetLast(obstacle.x) != object_HB.x[0]){
+            // console.log("X axis contact") // not in corner
 
-            if(GetLast(object_HB.y) === obstacle.y[0]){
+            if(GetLast(object_HB.y) >= obstacle.y[0] && GetLast(object_HB.y) <= GetLast(obstacle.y)){
                 // console.log("Top contact")
                 object.moveable.down = false;
-            } else if(object_HB.y[0] === GetLast(obstacle.y)){
+            } else if(object_HB.y[0] <= GetLast(obstacle.y) && object_HB.y[0] >= obstacle.y[0]){
                 // console.log("Bottom contact")
                 object.moveable.up = false;
             }
@@ -161,11 +196,11 @@ function getHitBox(object){
 
     let X = [], Y = [];
     for(let i = object.x; i <= object.x + object.w; i++){
-        X.push(i)
+        X.push(Math.round(i))
     }
 
     for(let j = object.y; j <= object.y + object.h; j++){
-        Y.push(j)
+        Y.push(Math.round(j))
     }
 
     // let border = [X, Y]
@@ -185,6 +220,11 @@ let world = []
 world.push(Obstacle1)
 world.push(Obstacle2)
 world.push(Obstacle3)
+
+world.push(border_up)
+world.push(border_down)
+world.push(border_left)
+world.push(border_right)
 
 
 
@@ -216,14 +256,13 @@ function draw(){
     clearCanvas()
 
     // drawSaparatingAxes(box1);
-    // drawSaparatingAxes(Obstacle1);
-    // drawSaparatingAxes(Obstacle2);
+
+    for(let x of world){
+        // drawSaparatingAxes(x)
+        drawRect(x)
+    }
     
     collisionDetect(box1, world)
-
-    drawRect(Obstacle1);
-    drawRect(Obstacle2);
-    drawRect(Obstacle3);
     playerMovement(box1);
     
     
