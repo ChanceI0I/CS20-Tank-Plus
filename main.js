@@ -1,8 +1,7 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-
-// const dynamicObj = [];
+const bullet = []
 
 const box1 = {
     x : 100, 
@@ -11,7 +10,7 @@ const box1 = {
     h : 20,
     a : 1,  // Alpha
     c : `0,198,0`,  // RGB
-    s : 2.03333,  // Speed 
+    s : 1,  // Speed !!! Have to be 1
 
     movement : '',
     moveable : {up : true, down : true, left : true, right: true},
@@ -82,6 +81,7 @@ const border_right = {
 
 
 
+
 /** Clear Whole Canvas */
 function clearCanvas(){
     ctx.clearRect(0,0,canvas.width, canvas.height)
@@ -119,6 +119,7 @@ function drawRect(object){
 
 function playerMovement(object) {
 
+    collisionDetect(object, world)
     addMovingEvent(object);
     drawRect(object);
 
@@ -164,7 +165,7 @@ function collisionDetect(object, obstacle_or){
 
     for(let obstacle of target){
         if(findCommon(object_HB.y, obstacle.y) && GetLast(object_HB.y) != obstacle.y[0] && GetLast(obstacle.y) != object_HB.y[0]){
-            console.log("Y axis contact") // not in corner
+            // console.log("Y axis contact") // not in corner
 
             if(GetLast(object_HB.x) >= obstacle.x[0] && GetLast(object_HB.x) <= GetLast(obstacle.x)){
                 // console.log("left contact")
@@ -251,8 +252,57 @@ function findCommon(arr1, arr2) {
     return arr1.some(check)
 }
 
+function createBullet(Orgin){
+    const bulletObj = {
+        x : Orgin.x + (Orgin.w/2),
+        y : Orgin.y + (Orgin.h/2),
+        w : 5,
+        h : 3,
+        s : 2,
+        a : 1,
+        c : `198,0,0`,
+        d : Orgin.movement, // d for direction
+    }
+    return bulletObj
+}
+
+function bulletUpdate(BulletList){
+    for(let ele of BulletList){
+        switch(ele.d){
+            case ("down" || "up"):
+                ele.y += ele.s
+                // [ele.x, ele.y] = [ele.y, ele.x]
+                break
+            case ("left" || "right"):
+                ele.x += ele.s
+                break
+        }
+        console.log(ele)
+        drawRect(ele);
+    }
+}
+
+function playerFire(Orgin){
+    document.addEventListener("repeat", function(event){
+        if(event.key === 'j'){
+            console.log("!!")
+        }
+    })
+}
+
+const bu = {
+    x : 115,
+    y : 110,
+    w : 5,
+    h : 3,
+    s : 2,
+    a : 1,
+    c : `198,0,0`,
+    d : "left", // d for direction
+}
 
 function draw(){
+    
     clearCanvas()
 
     // drawSaparatingAxes(box1);
@@ -262,11 +312,15 @@ function draw(){
         drawRect(x)
     }
     
-    collisionDetect(box1, world)
+    
+    // playerFire(box1)
     playerMovement(box1);
+    drawRect(bu)
+    
     
     
 
     requestAnimationFrame(draw)
 }
 requestAnimationFrame(draw)
+
