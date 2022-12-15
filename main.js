@@ -1,7 +1,7 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-const bullet = []
+const bulletList = []
 
 const box1 = {
     x : 100, 
@@ -10,10 +10,10 @@ const box1 = {
     h : 20,
     a : 1,  // Alpha
     c : `0,198,0`,  // RGB
-    s : 1,  // Speed !!! Have to be 1
 
-    movement : '',
-    moveable : {up : true, down : true, left : true, right: true},
+    // s : 1,  // Speed !!! Have to be 1
+    // movement : '',
+    // moveable : {up : true, down : true, left : true, right: true},
 }
 
 const Obstacle1 = {
@@ -80,6 +80,17 @@ const border_right = {
 }
 
 
+const player = {
+    
+    entity : box1,
+    
+    s : 1,  // Speed !!! Have to be 1
+    movement : '',
+    moveable : {up : true, down : true, left : true, right: true},
+}
+
+
+
 
 
 /** Clear Whole Canvas */
@@ -103,8 +114,10 @@ function addMovingEvent(object){
         }
     })
     
-    document.addEventListener('keyup', function(){
-        object.movement = '';
+    document.addEventListener('keyup', function(event){
+        if(event.key == 'w' || event.key == 'a' || event.key == 's' || event.key == 'd'){
+            object.movement = '';
+        }
     })
 
 }
@@ -118,25 +131,21 @@ function drawRect(object){
 
 
 function playerMovement(object) {
-
+    let entity = object.entity;
     collisionDetect(object, world)
     addMovingEvent(object);
-    drawRect(object);
+    drawRect(object.entity);
 
-    switch(object.movement){
-        case 'up':
-            if(object.moveable.up){object.y -= object.s}
-            break
-        case 'left':
-            if(object.moveable.left){object.x -= object.s}
-            break
-        case 'down':
-            if(object.moveable.down){object.y += object.s}
-            break
-        case 'right':
-            if(object.moveable.right)(object.x += object.s)
-            break
+    if(object.movement == 'up'){
+        if(object.moveable.up){entity.y -= object.s}
+    }else if(object.movement == 'left'){
+        if(object.moveable.left){entity.x -= object.s}
+    }else if(object.movement == 'down'){
+        if(object.moveable.down){entity.y += object.s}
+    }else if(object.movement == 'right'){
+        if(object.moveable.right)(entity.x += object.s)
     }
+    
 }
 
 
@@ -153,7 +162,7 @@ function collisionDetect(object, obstacle_or){
         target.push(element);
     }
 
-    let object_HB = getHitBox(object)
+    let object_HB = getHitBox(object.entity)
 
     object.moveable = {up : true, down : true, left : true, right: true}
     // const moveable = {up : true, down : true, left : true, right: true}; 
@@ -222,7 +231,7 @@ world.push(Obstacle1)
 world.push(Obstacle2)
 world.push(Obstacle3)
 
-world.push(border_up)
+// world.push(border_up)
 world.push(border_down)
 world.push(border_left)
 world.push(border_right)
@@ -252,18 +261,18 @@ function findCommon(arr1, arr2) {
     return arr1.some(check)
 }
 
-function createBullet(Orgin){
+function createBullet(Orgin, list){
     const bulletObj = {
         x : Orgin.x + (Orgin.w/2),
         y : Orgin.y + (Orgin.h/2),
-        w : 5,
-        h : 3,
+        w : 10,
+        h : 5,
         s : 2,
         a : 1,
-        c : `198,0,0`,
+        c : `0,0,0`,
         d : Orgin.movement, // d for direction
     }
-    return bulletObj
+    list.push(bulletObj)
 }
 
 function bulletUpdate(BulletList){
@@ -290,16 +299,18 @@ function playerFire(Orgin){
     })
 }
 
-const bu = {
+const bullet = {
     x : 115,
     y : 110,
-    w : 5,
-    h : 3,
+    w : 10,
+    h : 5,
     s : 2,
     a : 1,
-    c : `198,0,0`,
+    c : `0,0,0`,
     d : "left", // d for direction
 }
+
+// createBullet(box1, bulletList)
 
 function draw(){
     
@@ -314,8 +325,9 @@ function draw(){
     
     
     // playerFire(box1)
-    playerMovement(box1);
-    drawRect(bu)
+    playerMovement(player);
+    // bulletUpdate(bulletList)
+    
     
     
     
