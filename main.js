@@ -220,7 +220,7 @@ function getHitBox(object){
 
 
 function showInfo(x,y,info){
-    
+    ctx.fillStyle = "black"
     ctx.fillText(String(info), x, y)
 }
 
@@ -231,7 +231,7 @@ world.push(Obstacle1)
 world.push(Obstacle2)
 world.push(Obstacle3)
 
-// world.push(border_up)
+world.push(border_up)
 world.push(border_down)
 world.push(border_left)
 world.push(border_right)
@@ -315,6 +315,7 @@ const bullet = {
 function draw(){
     
     clearCanvas()
+    showInfo(20, 20, "This is Player-Entity Branch")
 
     // drawSaparatingAxes(box1);
 
