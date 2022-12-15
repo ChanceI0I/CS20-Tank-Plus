@@ -208,7 +208,7 @@ function getHitBox(object){
 
 
 function showInfo(x,y,info){
-    
+    ctx.fillStyle = 'black'
     ctx.fillText(String(info), x, y)
 }
 
@@ -299,8 +299,8 @@ const bu = {
 }
 
 function draw(){
-    
     clearCanvas()
+    showInfo(20,20,"This is Main Branch(default)")
 
     // drawSaparatingAxes(box1);
 
