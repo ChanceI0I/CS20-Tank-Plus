@@ -4,6 +4,7 @@ const ctx = canvas.getContext("2d");
 const bullet = []
 
 const box1 = {
+    id: 'box1',
     x : 100, 
     y : 100,
     w : 30,
@@ -17,6 +18,7 @@ const box1 = {
 }
 
 const Obstacle1 = {
+    id: 'Obstacle1',
     x : 200, 
     y : 200,
     w : 50,
@@ -26,6 +28,7 @@ const Obstacle1 = {
 }
 
 const Obstacle2 = {
+    id: 'Obstacle2',
     x : 20, 
     y : 350,
     w : 30,
@@ -35,6 +38,7 @@ const Obstacle2 = {
 }
 
 const Obstacle3 = {
+    id: 'Obstacle3',
     x : 50, 
     y : 150,
     w : 120,
@@ -44,6 +48,7 @@ const Obstacle3 = {
 }
 
 const border_up = {
+    id : 'border_up',
     x : 0, 
     y : 0,
     w : canvas.width,
@@ -53,6 +58,7 @@ const border_up = {
 }
 
 const border_down = {
+    id : 'border_down',
     x : 0, 
     y : canvas.height - 5,
     w : canvas.width,
@@ -62,6 +68,7 @@ const border_down = {
 }
 
 const border_left = {
+    id : 'border_left',
     x : 0, 
     y : 0,
     w : 5,
@@ -71,6 +78,7 @@ const border_left = {
 }
 
 const border_right = {
+    id : 'border_right',
     x : canvas.width - 5, 
     y : 0,
     w : 5,
@@ -249,18 +257,18 @@ function findCommon(arr1, arr2) {
     return arr1.some(check)
 }
 
-function createBullet(Orgin){
+function createBullet(Orgin, list){
     const bulletObj = {
         x : Orgin.x + (Orgin.w/2),
         y : Orgin.y + (Orgin.h/2),
-        w : 5,
-        h : 3,
+        w : 10,
+        h : 5,
         s : 2,
         a : 1,
-        c : `198,0,0`,
+        c : `0,0,0`,
         d : Orgin.movement, // d for direction
     }
-    return bulletObj
+    list.push(bulletObj)
 }
 
 function bulletUpdate(BulletList){
@@ -287,16 +295,6 @@ function playerFire(Orgin){
     })
 }
 
-const bu = {
-    x : 115,
-    y : 110,
-    w : 5,
-    h : 3,
-    s : 2,
-    a : 1,
-    c : `198,0,0`,
-    d : "left", // d for direction
-}
 
 function draw(){
     clearCanvas()
@@ -312,7 +310,6 @@ function draw(){
     
     // playerFire(box1)
     playerMovement(box1);
-    drawRect(bu)
     
     
     
