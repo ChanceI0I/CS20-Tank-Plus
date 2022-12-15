@@ -103,8 +103,10 @@ function addMovingEvent(object){
         }
     })
     
-    document.addEventListener('keyup', function(){
-        object.movement = '';
+    document.addEventListener('keyup', function(event){
+        if(event.key == 'w' || event.key == 'a' || event.key == 's' || event.key == 'd'){
+            object.movement = '';
+        }
     })
 
 }
@@ -123,19 +125,14 @@ function playerMovement(object) {
     addMovingEvent(object);
     drawRect(object);
 
-    switch(object.movement){
-        case 'up':
-            if(object.moveable.up){object.y -= object.s}
-            break
-        case 'left':
-            if(object.moveable.left){object.x -= object.s}
-            break
-        case 'down':
-            if(object.moveable.down){object.y += object.s}
-            break
-        case 'right':
-            if(object.moveable.right)(object.x += object.s)
-            break
+    if(object.movement == 'up'){
+        if(object.moveable.up){object.y -= object.s}
+    }else if(object.movement == 'left'){
+        if(object.moveable.left){object.x -= object.s}
+    }else if(object.movement == 'down'){
+        if(object.moveable.down){object.y += object.s}
+    }else if(object.movement == 'right'){
+        if(object.moveable.right)(object.x += object.s)
     }
 }
 
