@@ -3,16 +3,21 @@ const ctx = canvas.getContext("2d");
 
 const bullet = []
 
-const box1 = {
+
+
+const player = {
     id: 'box1',
     x : 100, 
-    y : 100,
-    w : 30,
-    h : 20,
+    y : 100, 
+    w : 30, //width
+    h : 20, //height
     a : 1,  // Alpha
     c : `0,198,0`,  // RGB
     s : 1,  // Speed !!! Have to be 1
 
+    r : 150, //reload time
+    t : 0, //local time
+    facing : 'right',
     movement : '',
     moveable : {up : true, down : true, left : true, right: true},
 }
@@ -117,6 +122,7 @@ function addMovingEvent(object){
         }
     })
 
+    
 }
 
 function drawRect(object){
@@ -142,6 +148,8 @@ function playerMovement(object) {
     }else if(object.movement == 'right'){
         if(object.moveable.right)(object.x += object.s)
     }
+
+    if(object.movement != ''){object.facing = object.movement}
 }
 
 
@@ -151,6 +159,14 @@ function playerMovement(object) {
  */
 function collisionDetect(object, obstacle_or){
 
+    function findCommon(arr1, arr2) {
+        function check(value){
+            if(arr2.includes(value)){
+                return value
+            }
+        }
+        return arr1.some(check)
+    }
 
     let target = [];
     for(let element of obstacle_or){
@@ -246,73 +262,104 @@ function drawSaparatingAxes(object){
     ctx.fillRect(390, object.y, 5, object.h);
 }
 
-
-
-function findCommon(arr1, arr2) {
-    function check(value){
-        if(arr2.includes(value)){
-            return value
-        }
+function drawDirection(object){
+    // console.log("drawing")
+    ctx.beginPath();
+    ctx.moveTo((object.x + object.w/2), (object.y + object.h/2))
+    switch(object.facing){
+        case "up":
+            ctx.lineTo((object.x + object.w/2), (object.y + object.h/2) - 50)
+            break
+        case "down":
+            ctx.lineTo((object.x + object.w/2), (object.y + object.h/2) + 50)
+            break
+        case "left":
+            ctx.lineTo((object.x + object.w/2) - 50, (object.y + object.h/2))
+            break
+        case "right":
+            ctx.lineTo((object.x + object.w/2) + 50, (object.y + object.h/2))
+            break
     }
-    return arr1.some(check)
+    ctx.stroke()
 }
+
+
 
 function createBullet(Orgin, list){
     const bulletObj = {
-        x : Orgin.x + (Orgin.w/2),
-        y : Orgin.y + (Orgin.h/2),
-        w : 10,
+        x : Orgin.x + (Orgin.w/2) - 2.5,
+        y : Orgin.y + (Orgin.h/2) - 2.5,
+        w : 5,
         h : 5,
         s : 2,
         a : 1,
         c : `0,0,0`,
-        d : Orgin.movement, // d for direction
+        d : Orgin.facing, // d for direction
     }
     list.push(bulletObj)
 }
 
 function bulletUpdate(BulletList){
-    for(let ele of BulletList){
-        switch(ele.d){
-            case ("down" || "up"):
-                ele.y += ele.s
-                // [ele.x, ele.y] = [ele.y, ele.x]
+    for(let i = 0; i <= BulletList.length - 1; i++){
+        switch(BulletList[i].d){
+            case "down":
+                BulletList[i].y += BulletList[i].s
                 break
-            case ("left" || "right"):
-                ele.x += ele.s
+            case "up":
+                BulletList[i].y -= BulletList[i].s
+                break
+            case "left":
+                BulletList[i].x -= BulletList[i].s
+                break
+            case "right":
+                BulletList[i].x += BulletList[i].s
                 break
         }
-        console.log(ele)
-        drawRect(ele);
+
+        if(BulletList[i].x > //border)
+        drawRect(BulletList[i]);
     }
 }
 
 function playerFire(Orgin){
-    document.addEventListener("repeat", function(event){
-        if(event.key === 'j'){
-            console.log("!!")
+    document.addEventListener("keydown", function(event){
+        if(event.key === 'j' && Orgin.t <= 0){
+            Orgin.t = Orgin.r
+
+            createBullet(Orgin, bullet)
+
+
+
         }
     })
+    Orgin.t -= 1
 }
+
 
 
 function draw(){
     clearCanvas()
     showInfo(20,20,"This is Main Branch(default)")
+    if(player.t <= 0){console.log("Ready")}
 
-    // drawSaparatingAxes(box1);
+    
+
 
     for(let x of world){
-        // drawSaparatingAxes(x)
         drawRect(x)
     }
     
     
-    // playerFire(box1)
-    playerMovement(box1);
+    playerMovement(player);
+    drawDirection(player)
+    playerFire(player)
+
     
     
     
+    
+    
+    bulletUpdate(bullet)
 
     requestAnimationFrame(draw)
 }
