@@ -2,8 +2,7 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
 const bullet = []
-
-
+const Entity = []
 
 const player = {
     id: 'box1',
@@ -15,7 +14,7 @@ const player = {
     c : `0,198,0`,  // RGB
     s : 1,  // Speed !!! Have to be 1
 
-    r : 150, //reload time
+    r : 10, //reload time
     t : 0, //local time
     facing : 'right',
     movement : '',
@@ -94,7 +93,6 @@ const border_right = {
 
 
 
-
 /** Clear Whole Canvas */
 function clearCanvas(){
     ctx.clearRect(0,0,canvas.width, canvas.height)
@@ -131,8 +129,6 @@ function drawRect(object){
     
 }
 
-
-
 function playerMovement(object) {
 
     collisionDetect(object, world)
@@ -152,21 +148,55 @@ function playerMovement(object) {
     if(object.movement != ''){object.facing = object.movement}
 }
 
+function findCommon(arr1, arr2) {
+    function check(value){
+        if(arr2.includes(value)){
+            return value
+        }
+    }
+    return arr1.some(check)
+}
+
+function GetLast(array){
+    let len = array.length;
+    return array[len-1]
+}
+
+function collision(object, obstacle){
+    let object_HB = getHitBox(object)
+    let target = []
+
+    // console.log(object_HB, target)
+
+    for(let element of obstacle){
+        element = getHitBox(element);
+        target.push(element);
+    }
+
+    // for(let obstacle of target){
+    //     if(findCommon(object_HB.y, obstacle.y) && GetLast(object_HB.y) != obstacle.y[0] && GetLast(obstacle.y) != object_HB.y[0]){
+    //         if(findCommon(object_HB.x, obstacle.x) && GetLast(object_HB.x) != obstacle.x[0] && GetLast(obstacle.x) != object_HB.x[0]){
+    //             return true
+    //         }
+    //     }
+    // }
+
+    for(let obstacle of target){
+        if(findCommon(object_HB.y, obstacle.y) && findCommon(object_HB.x, obstacle.x)){
+            return true
+        }
+
+        
+    }
+    console.log(object, obstacle)
+    return false
+}
 
 /**
  * @param {object} object Moving object
- * @param {Array} target Obstacles object array
+ * @param {Array} obstacle_or Obstacles object array
  */
 function collisionDetect(object, obstacle_or){
-
-    function findCommon(arr1, arr2) {
-        function check(value){
-            if(arr2.includes(value)){
-                return value
-            }
-        }
-        return arr1.some(check)
-    }
 
     let target = [];
     for(let element of obstacle_or){
@@ -177,12 +207,6 @@ function collisionDetect(object, obstacle_or){
     let object_HB = getHitBox(object)
 
     object.moveable = {up : true, down : true, left : true, right: true}
-    // const moveable = {up : true, down : true, left : true, right: true}; 
-
-    function GetLast(array){
-        let len = array.length;
-        return array[len-1]
-    }
 
     for(let obstacle of target){
         if(findCommon(object_HB.y, obstacle.y) && GetLast(object_HB.y) != obstacle.y[0] && GetLast(obstacle.y) != object_HB.y[0]){
@@ -210,9 +234,7 @@ function collisionDetect(object, obstacle_or){
         }
     }
 
-    return
 }
-
 
 function getHitBox(object){
 
@@ -230,12 +252,10 @@ function getHitBox(object){
     return {x : X, y : Y}
 }
 
-
 function showInfo(x,y,info){
     ctx.fillStyle = 'black'
     ctx.fillText(String(info), x, y)
 }
-
 
 
 let world = []
@@ -247,7 +267,6 @@ world.push(border_up)
 world.push(border_down)
 world.push(border_left)
 world.push(border_right)
-
 
 
 function drawSaparatingAxes(object){
@@ -283,24 +302,29 @@ function drawDirection(object){
     ctx.stroke()
 }
 
-
-
 function createBullet(Orgin, list){
     const bulletObj = {
         x : Orgin.x + (Orgin.w/2) - 2.5,
         y : Orgin.y + (Orgin.h/2) - 2.5,
         w : 5,
         h : 5,
-        s : 2,
+        s : 3,
         a : 1,
         c : `0,0,0`,
         d : Orgin.facing, // d for direction
+        damage : 2,
     }
     list.push(bulletObj)
 }
 
-function bulletUpdate(BulletList){
+function bulletUpdate(BulletList, obstacle){
     for(let i = 0; i <= BulletList.length - 1; i++){
+
+        if(collision(BulletList[i], obstacle) || collision(BulletList[i], Entity)){
+            BulletList.splice(i, i+1)
+            continue
+        }
+
         switch(BulletList[i].d){
             case "down":
                 BulletList[i].y += BulletList[i].s
@@ -316,7 +340,6 @@ function bulletUpdate(BulletList){
                 break
         }
 
-        if(BulletList[i].x > //border)
         drawRect(BulletList[i]);
     }
 }
@@ -327,39 +350,68 @@ function playerFire(Orgin){
             Orgin.t = Orgin.r
 
             createBullet(Orgin, bullet)
-
-
-
         }
     })
     Orgin.t -= 1
 }
 
+function createDummy(x, y ,health ){
+    let dummy = {
+        x : x,
+        y : y,
+        w : 20,
+        h : 20,
+        health : health, 
+    }
 
+    Entity.push(dummy)
+}
+
+
+function EntityUpdate(Entity, Projectile){
+    for(let p of Projectile){
+        for(let e = 0; e<Entity.length; e++){
+
+            showInfo(Entity[e].x - 5, Entity[e].y - 5, `${Entity[e].health}`)
+
+            if(collision(Entity[e], p)){
+                Entity[e].health -= p.damage
+                console.log("hit")
+            }
+
+            if(Entity[e].health <= 0){
+                Entity.splice(e, e+1)
+            }
+        }
+    }
+}
+
+createDummy(50,70,20)
 
 function draw(){
     clearCanvas()
     showInfo(20,20,"This is Main Branch(default)")
-    if(player.t <= 0){console.log("Ready")}
+    if(player.t <= 0){showInfo(200,20,"READY")} else {showInfo(200,20,"NOT READY")}
 
-    
-
-
+   
     for(let x of world){
         drawRect(x)
     }
+
+    for(let e of Entity){
+        drawRect(e)
+    }
+
+    EntityUpdate(Entity, bullet)
+    bulletUpdate(bullet, world)
     
     
     playerMovement(player);
     drawDirection(player)
     playerFire(player)
+    // collision(player, world)
 
-    
-    
-    
-    
-    
-    bulletUpdate(bullet)
+
 
     requestAnimationFrame(draw)
 }
