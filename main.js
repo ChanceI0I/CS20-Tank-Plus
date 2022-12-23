@@ -8,7 +8,7 @@ const player = {
     id: 'box1',
     x : 100, 
     y : 100, 
-    w : 30, //width
+    w : 20, //width
     h : 20, //height
     a : 1,  // Alpha
     c : `0,198,0`,  // RGB
@@ -132,6 +132,7 @@ function drawRect(object){
 function playerMovement(object) {
 
     collisionDetect(object, world)
+    collisionDetect(object, Entity)
     addMovingEvent(object);
     drawRect(object);
 
@@ -165,7 +166,7 @@ function GetLast(array){
 function collision(object, obstacle){
     let object_HB = getHitBox(object)
     let target = []
-
+    
     // console.log(object_HB, target)
 
     for(let element of obstacle){
@@ -188,7 +189,6 @@ function collision(object, obstacle){
 
         
     }
-    console.log(object, obstacle)
     return false
 }
 
@@ -258,7 +258,7 @@ function showInfo(x,y,info){
 }
 
 
-let world = []
+const world = []
 world.push(Obstacle1)
 world.push(Obstacle2)
 world.push(Obstacle3)
@@ -369,12 +369,31 @@ function createDummy(x, y ,health ){
 
 
 function EntityUpdate(Entity, Projectile){
-    for(let p of Projectile){
-        for(let e = 0; e<Entity.length; e++){
+    // for(let p of Projectile){
+    //     for(let e = 0; e<Entity.length; e++){
 
-            showInfo(Entity[e].x - 5, Entity[e].y - 5, `${Entity[e].health}`)
+    //         showInfo(Entity[e].x - 5, Entity[e].y - 5, `${Entity[e].health}`)
 
-            if(collision(Entity[e], p)){
+    //         if(collision(Entity[e], [p])){
+    //             Entity[e].health -= p.damage
+    //             console.log("hit")
+    //         }
+
+    //         if(Entity[e].health <= 0){
+    //             Entity.splice(e, e+1)
+    //         }
+    //     }
+    // }
+
+    
+    for(let e = 0; e<Entity.length; e++){
+        showInfo(Entity[e].x+3, Entity[e].y - 5, `${Entity[e].health}`)
+
+        for(let p of Projectile){
+
+            
+
+            if(collision(Entity[e], [p])){
                 Entity[e].health -= p.damage
                 console.log("hit")
             }
@@ -385,6 +404,15 @@ function EntityUpdate(Entity, Projectile){
         }
     }
 }
+
+function hitAnimation(Entity, ){
+    Entity[0].w += 1;
+    Entity[0].x -= 0.5;
+    Entity[0].h += 1;
+    Entity[0].y -= 0.5;
+}
+
+
 
 createDummy(50,70,20)
 
@@ -410,6 +438,8 @@ function draw(){
     drawDirection(player)
     playerFire(player)
     // collision(player, world)
+
+    
 
 
 
