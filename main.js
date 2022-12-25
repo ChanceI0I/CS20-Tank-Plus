@@ -3,6 +3,7 @@ const ctx = canvas.getContext("2d");
 
 const bullet = []
 const Entity = []
+const Particles = []
 
 const player = {
     id: 'box1',
@@ -129,10 +130,19 @@ function drawRect(object){
     
 }
 
+function drawCircle(object){
+    ctx.beginPath()
+    ctx.fillStyle = `rgb(${object.c}, ${object.a})`;
+    ctx.arc(object.x, object.y, object.r, 0, 2*Math.PI)
+    ctx.fill()
+}
+
+
 function playerMovement(object) {
 
-    collisionDetect(object, world)
-    collisionDetect(object, Entity)
+    const Allobstacle = world.concat(Entity)
+    collisionDetect(object, Allobstacle)
+    // collisionDetect(object, Entity)
     addMovingEvent(object);
     drawRect(object);
 
@@ -163,32 +173,19 @@ function GetLast(array){
     return array[len-1]
 }
 
-function collision(object, obstacle){
-    let object_HB = getHitBox(object)
-    let target = []
+/**
+ * @param {object} object1
+ * @param {object} object2
+ */
+function collision(object1, object2){
+    let object_HB = getHitBox(object1)
+    let target = getHitBox(object2)
     
-    // console.log(object_HB, target)
-
-    for(let element of obstacle){
-        element = getHitBox(element);
-        target.push(element);
+    
+    if(findCommon(object_HB.y, target.y) && findCommon(object_HB.x, target.x)){
+        return true
     }
 
-    // for(let obstacle of target){
-    //     if(findCommon(object_HB.y, obstacle.y) && GetLast(object_HB.y) != obstacle.y[0] && GetLast(obstacle.y) != object_HB.y[0]){
-    //         if(findCommon(object_HB.x, obstacle.x) && GetLast(object_HB.x) != obstacle.x[0] && GetLast(obstacle.x) != object_HB.x[0]){
-    //             return true
-    //         }
-    //     }
-    // }
-
-    for(let obstacle of target){
-        if(findCommon(object_HB.y, obstacle.y) && findCommon(object_HB.x, obstacle.x)){
-            return true
-        }
-
-        
-    }
     return false
 }
 
@@ -317,13 +314,8 @@ function createBullet(Orgin, list){
     list.push(bulletObj)
 }
 
-function bulletUpdate(BulletList, obstacle){
+function bulletUpdate(BulletList, obstacle1, obstacle2){
     for(let i = 0; i <= BulletList.length - 1; i++){
-
-        if(collision(BulletList[i], obstacle) || collision(BulletList[i], Entity)){
-            BulletList.splice(i, i+1)
-            continue
-        }
 
         switch(BulletList[i].d){
             case "down":
@@ -368,60 +360,125 @@ function createDummy(x, y ,health ){
 }
 
 
-function EntityUpdate(Entity, Projectile){
-    // for(let p of Projectile){
-    //     for(let e = 0; e<Entity.length; e++){
+function hitAnimation(Entity, scale=2){
+    
+    function scaleUp(Entity){
+        Entity.w += 1;
+        Entity.x -= 0.5;
+        Entity.h += 1;
+        Entity.y -= 0.5;
+    }
 
-    //         showInfo(Entity[e].x - 5, Entity[e].y - 5, `${Entity[e].health}`)
+    function scaleDown(Entity){
+        Entity.w -= 1;
+        Entity.x += 0.5;
+        Entity.h -= 1;
+        Entity.y += 0.5;
+    }
 
-    //         if(collision(Entity[e], [p])){
-    //             Entity[e].health -= p.damage
-    //             console.log("hit")
-    //         }
+    let count = 0
 
-    //         if(Entity[e].health <= 0){
-    //             Entity.splice(e, e+1)
-    //         }
-    //     }
-    // }
+    function animation(){
+        // console.log("hit")
+        if(count < scale){
+            scaleUp(Entity);
+        } else if(count >= scale){
+            scaleDown(Entity);
+        }
+        count += 0.5
+
+        if(count < scale*2){requestAnimationFrame(animation)}
+    }
+    requestAnimationFrame(animation)
+}
+
+function CreateParticles(x,y){
+    
+    // const Particles = []
+
+    function Trandom(){
+        if(Math.random() < 0.5){
+            return -1*Math.random()
+        }else{
+            return Math.random()
+        }
+    }
+    
+    function createParticles(){
+        const particle = {
+            x : x,
+            y : y,
+            vx : Trandom() * 0.3,
+            vy : Trandom() * 0.3,
+            r : Math.random() * 2,
+            c : `${Math.random()*100},${Math.random()*100},${Math.random()*255}`,
+            a : 0.7,
+            count : 0,
+        }
+        return particle
+    }
 
     
-    for(let e = 0; e<Entity.length; e++){
-        showInfo(Entity[e].x+3, Entity[e].y - 5, `${Entity[e].health}`)
+    for(let i = 0; i<50; i+=1){
+        Particles.push(createParticles())
+    }
+    
+}
 
-        for(let p of Projectile){
-
-            
-
-            if(collision(Entity[e], [p])){
-                Entity[e].health -= p.damage
-                console.log("hit")
-            }
-
-            if(Entity[e].health <= 0){
-                Entity.splice(e, e+1)
-            }
+function particleUpdate(particles){
+    for(let i = 0; i < particles.length; i+=1){
+        if(particles[i].count < 50){
+            particles[i].x += particles[i].vx
+            particles[i].y += particles[i].vy
+            particles[i].a -= 0.01
+            drawCircle(particles[i])
+            particles[i].count += 1
+        } else {
+            particles.splice(i,i+1)
         }
     }
 }
 
-function hitAnimation(Entity, ){
-    Entity[0].w += 1;
-    Entity[0].x -= 0.5;
-    Entity[0].h += 1;
-    Entity[0].y -= 0.5;
-}
+function GameUpdate(){
+    for(let w = 0; w < world.length; w+=1){
+        for(let b = 0; b < bullet.length; b+=1){
+            if(collision(world[w], bullet[b])){
+                CreateParticles((bullet[b].x + bullet[b].w/2),(bullet[b].y + bullet[b].h/2))
+                bullet.splice(b,b+1)
+            }
+        }
+    }
 
+    for(let e = 0; e < Entity.length; e+=1){
+        showInfo(Entity[e].x - 5, Entity[e].y - 5, `${Entity[e].health}`)
+        for(let b = 0; b < bullet.length; b+=1){
+            if(Entity[e] != undefined && collision(Entity[e], bullet[b])){
+                
+                hitAnimation(Entity[e])
+                CreateParticles((bullet[b].x + bullet[b].w/2),(bullet[b].y + bullet[b].h/2))
+
+                if(Entity[e].health <= bullet[b].damage){
+                    Entity.splice(e,e+1)
+                } else {
+                    Entity[e].health -= bullet[b].damage
+                }
+
+                bullet.splice(b,b+1)
+            }
+        }
+    }
+}
 
 
 createDummy(50,70,20)
 
 function draw(){
     clearCanvas()
+    
     showInfo(20,20,"This is Main Branch(default)")
     if(player.t <= 0){showInfo(200,20,"READY")} else {showInfo(200,20,"NOT READY")}
+    
 
-   
     for(let x of world){
         drawRect(x)
     }
@@ -430,20 +487,20 @@ function draw(){
         drawRect(e)
     }
 
-    EntityUpdate(Entity, bullet)
-    bulletUpdate(bullet, world)
-    
+    GameUpdate()
+    bulletUpdate(bullet, world, Entity)
+    particleUpdate(Particles)
     
     playerMovement(player);
     drawDirection(player)
     playerFire(player)
-    // collision(player, world)
 
     
 
 
-
+    
     requestAnimationFrame(draw)
 }
 requestAnimationFrame(draw)
+
 
