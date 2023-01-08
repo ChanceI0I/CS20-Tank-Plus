@@ -5,6 +5,13 @@ const bullet = []
 const Entity = []
 const Particles = []
 
+const GameSetting = {
+    NumberOfObstacles : 7,
+    NumberOfEnemy : 2,
+    MaxEnemy : 5,
+    EnemyIncreaseRate : 1,
+}
+
 const player = {
     id: 'box1',
     x : 100, 
@@ -14,43 +21,45 @@ const player = {
     a : 1,  // Alpha
     c : `0,198,0`,  // RGB
     s : 1,  // Speed !!! Have to be 1
+    health : 4,
 
     r : 10, //reload time
     t : 0, //local time
     facing : 'right',
     movement : '',
     moveable : {up : true, down : true, left : true, right: true},
+    score : 0,
 }
 
-const Obstacle1 = {
-    id: 'Obstacle1',
-    x : 200, 
-    y : 200,
-    w : 50,
-    h : 30,
-    a : 1,
-    c : `198,0,0`,
-}
+// const Obstacle1 = {
+//     id: 'Obstacle1',
+//     x : 200, 
+//     y : 200,
+//     w : 50,
+//     h : 30,
+//     a : 1,
+//     c : `198,0,0`,
+// }
 
-const Obstacle2 = {
-    id: 'Obstacle2',
-    x : 20, 
-    y : 350,
-    w : 30,
-    h : 40,
-    a : 1,
-    c : `198,0,0`,
-}
+// const Obstacle2 = {
+//     id: 'Obstacle2',
+//     x : 20, 
+//     y : 350,
+//     w : 30,
+//     h : 40,
+//     a : 1,
+//     c : `198,0,0`,
+// }
 
-const Obstacle3 = {
-    id: 'Obstacle3',
-    x : 50, 
-    y : 150,
-    w : 120,
-    h : 40,
-    a : 1,
-    c : `198,0,0`,
-}
+// const Obstacle3 = {
+//     id: 'Obstacle3',
+//     x : 50, 
+//     y : 150,
+//     w : 120,
+//     h : 40,
+//     a : 1,
+//     c : `198,0,0`,
+// }
 
 const border_up = {
     id : 'border_up',
@@ -138,12 +147,12 @@ function drawCircle(object){
 }
 
 
-function playerMovement(object) {
+function Movement(object) {
 
     const Allobstacle = world.concat(Entity)
     collisionDetect(object, Allobstacle)
     // collisionDetect(object, Entity)
-    addMovingEvent(object);
+    
     drawRect(object);
 
     if(object.movement == 'up'){
@@ -254,16 +263,44 @@ function showInfo(x,y,info){
     ctx.fillText(String(info), x, y)
 }
 
+function GenerateWorld(ObstacleNum){
+
+    function GenerateObs(n){
+        const obstacle = {
+            id: `Obstacle${n}`,
+            x : Math.round(Math.random()*350), 
+            y : Math.round(Math.random()*350),
+            w : Math.round(Math.random()*70) + 30,
+            h : Math.round(Math.random()*70) + 30,
+            a : 1,
+            c : `41, 99, 194`,
+        }
+
+        if(collision(player, obstacle)){
+            obstacle.x = Math.round(Math.random()*350);
+            obstacle.y = Math.round(Math.random()*350);
+        }
+
+        return obstacle
+    }
+
+    for(let i = 0; i < ObstacleNum; i+=1){
+        world.push(GenerateObs(i))
+    }
+}
+
 
 const world = []
-world.push(Obstacle1)
-world.push(Obstacle2)
-world.push(Obstacle3)
+// world.push(Obstacle1)
+// world.push(Obstacle2)
+// world.push(Obstacle3)
 
 world.push(border_up)
 world.push(border_down)
 world.push(border_left)
 world.push(border_right)
+
+
 
 
 function drawSaparatingAxes(object){
@@ -344,20 +381,94 @@ function playerFire(Orgin){
             createBullet(Orgin, bullet)
         }
     })
-    Orgin.t -= 1
+
+    if(Orgin.t > 0){
+        Orgin.t -= 1
+    }
+    
 }
 
-function createDummy(x, y ,health ){
-    let dummy = {
-        x : x,
-        y : y,
-        w : 20,
-        h : 20,
-        health : health, 
+// function createDummy(x, y ,health, movement){
+//     let dummy = {
+//         x : x,
+//         y : y,
+//         w : 20,
+//         h : 20,
+//         // vx : vx,
+//         // vy : vy,
+//         health : health, 
+//         c : "0,0,250",
+//         a : "1",
+
+//         s : 1,
+//         facing : '',
+//         movement : '',
+//         moveable : {up : true, down : true, left : true, right: true},
+//     }
+
+//     Entity.push(dummy)
+// }
+
+function createEnemy(EnemyList){
+    let direction = EnemyDrection()
+    const enemy = {
+        x : Math.floor(Math.random()*400),
+        y : Math.floor(Math.random()*400),
+        w : 25,
+        h : 25,
+        c : `200,0,0`,  
+        s : 1, 
+        a : 1,
+
+        r : 10,
+        t : 0,
+        wt : Math.round(Math.random()*300),
+        health : Math.round(Math.random()*30),
+        facing : direction,
+        movement : direction,
+        moveable : {up : true, down : true, left : true, right: true},
+
     }
 
-    Entity.push(dummy)
+    function CheckOverlap(){
+        for(let o of world){
+            if(collision(enemy, o)){
+                console.log(enemy.x,enemy.y)
+                enemy.x = Math.floor(Math.random()*400);
+                enemy.y = Math.floor(Math.random()*400);
+                console.log(enemy.x,enemy.y)
+                CheckOverlap()
+                break
+                
+            }
+        }
+    }
+
+    CheckOverlap()
+
+    // console.log(enemy.x, enemy.y, direction)
+    EnemyList.push(enemy)
 }
+
+function EnemyDrection(){
+    let Random = Math.random()
+    let direction = ""
+
+    if(Random < 0.25){
+        direction = "left"
+    }else if(Random < 0.5){
+        direction = "right"
+    }else if(Random < 0.75){
+        direction = "up"
+    }else if(Random < 1){
+        direction = "down"
+    }
+
+    return direction
+}
+
+// function EnemyFire(Enemy){ //Future Update
+// }
 
 
 function hitAnimation(Entity, scale=2){
@@ -410,16 +521,19 @@ function CreateParticles(x,y){
             y : y,
             vx : Trandom() * 0.3,
             vy : Trandom() * 0.3,
-            r : Math.random() * 2,
+            // r : Math.random() * 2,
             c : `${Math.random()*100},${Math.random()*100},${Math.random()*255}`,
             a : 0.7,
             count : 0,
+
+            w : Math.random()*10,
+            h : Math.random()*10,
         }
         return particle
     }
 
     
-    for(let i = 0; i<50; i+=1){
+    for(let i = 0; i<5; i+=1){
         Particles.push(createParticles())
     }
     
@@ -431,11 +545,66 @@ function particleUpdate(particles){
             particles[i].x += particles[i].vx
             particles[i].y += particles[i].vy
             particles[i].a -= 0.01
-            drawCircle(particles[i])
+            // drawCircle(particles[i])
+            drawRect(particles[i])
             particles[i].count += 1
         } else {
             particles.splice(i,i+1)
         }
+    }
+}
+
+function EntityUpdate(){
+    // const Obs = world.concat(Entity)
+    // const Obs = []
+    // Obs.push(player)
+
+    for(let e = 0; e<Entity.length; e+=1){
+        let en = Entity.slice(0,e).concat(world)
+        let Obs = en.concat(Entity.slice(e+1, Entity.length))
+        Obs.push(player)
+        
+
+        for(let o of Obs){
+            if(collision(Entity[e],o)){
+                
+                if(Entity[e].moveable.up == false){
+                    Entity[e].movement = "down"
+                }else if(Entity[e].moveable.right == false){
+                    Entity[e].movement = "left"
+                }else if(Entity[e].moveable.left == false){
+                    Entity[e].movement = "right"
+                }else if(Entity[e].moveable.down == false){
+                    Entity[e].movement = "up"
+                }
+
+                // console.log(Entity[e].movement, Entity[e].facing)
+            }
+
+        }
+        
+        if(Entity[e].wt > 0){
+            Entity[e].wt -= 1
+        } else if(Entity[e].wt <= 0){
+            Entity[e].facing = Entity[e].movement = EnemyDrection()
+            Entity[e].wt = Math.round(Math.random()*300)
+        }
+
+        
+        collisionDetect(Entity[e], Obs)
+        
+        if(Entity[e].movement == 'up'){
+            if(Entity[e].moveable.up){Entity[e].y -= Entity[e].s}
+        }else if(Entity[e].movement == 'left'){
+            if(Entity[e].moveable.left){Entity[e].x -= Entity[e].s}
+        }else if(Entity[e].movement == 'down'){
+            if(Entity[e].moveable.down){Entity[e].y += Entity[e].s}
+        }else if(Entity[e].movement == 'right'){
+            if(Entity[e].moveable.right)(Entity[e].x += Entity[e].s)
+        }
+    
+        if(Entity[e].movement != ''){Entity[e].facing = Entity[e].movement}
+        
     }
 }
 
@@ -458,25 +627,44 @@ function GameUpdate(){
                 CreateParticles((bullet[b].x + bullet[b].w/2),(bullet[b].y + bullet[b].h/2))
 
                 if(Entity[e].health <= bullet[b].damage){
-                    Entity.splice(e,e+1)
+                    // console.log(e, Entity[e])
+                    Entity.splice(e,1)
+
+                    player.score += 5
+
                 } else {
                     Entity[e].health -= bullet[b].damage
                 }
 
-                bullet.splice(b,b+1)
+                bullet.splice(b,1)
             }
         }
     }
 }
 
+GenerateWorld(GameSetting.NumberOfObstacles)
 
-createDummy(50,70,20)
+function SpawnEnemy(){
+    if(Entity.length == 0){
+        for(let i = 0; i < GameSetting.NumberOfEnemy; i+=1){
+            createEnemy(Entity)
+        }
+
+        if(GameSetting.NumberOfEnemy < GameSetting.MaxEnemy){
+            GameSetting.NumberOfEnemy += 1
+        }
+        
+    }
+}
+
+
 
 function draw(){
     clearCanvas()
     
     showInfo(20,20,"This is Main Branch(default)")
     if(player.t <= 0){showInfo(200,20,"READY")} else {showInfo(200,20,"NOT READY")}
+    showInfo(300,20,`Score: ${player.score}`)
     
 
     for(let x of world){
@@ -485,19 +673,23 @@ function draw(){
 
     for(let e of Entity){
         drawRect(e)
+        drawDirection(e)
     }
 
     GameUpdate()
+    SpawnEnemy()
+    EntityUpdate()
     bulletUpdate(bullet, world, Entity)
     particleUpdate(Particles)
-    
-    playerMovement(player);
+
+    addMovingEvent(player);
+    Movement(player);
     drawDirection(player)
     playerFire(player)
 
     
 
-
+    
     
     requestAnimationFrame(draw)
 }
