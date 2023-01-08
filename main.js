@@ -10,6 +10,7 @@ const GameSetting = {
     NumberOfEnemy : 2,
     MaxEnemy : 5,
     EnemyIncreaseRate : 1,
+    FramePerSecond : 160,
 }
 
 const player = {
@@ -291,9 +292,6 @@ function GenerateWorld(ObstacleNum){
 
 
 const world = []
-// world.push(Obstacle1)
-// world.push(Obstacle2)
-// world.push(Obstacle3)
 
 world.push(border_up)
 world.push(border_down)
@@ -316,7 +314,7 @@ function drawSaparatingAxes(object){
 }
 
 function drawDirection(object){
-    // console.log("drawing")
+
     ctx.beginPath();
     ctx.moveTo((object.x + object.w/2), (object.y + object.h/2))
     switch(object.facing){
@@ -656,43 +654,40 @@ function SpawnEnemy(){
         
     }
 }
-
-
-
-function draw(){
-    clearCanvas()
+ 
+function draw() {
+    setTimeout(function() {
+        requestAnimationFrame(draw);
+ 
+        clearCanvas()
     
-    showInfo(20,20,"This is Main Branch(default)")
-    if(player.t <= 0){showInfo(200,20,"READY")} else {showInfo(200,20,"NOT READY")}
-    showInfo(300,20,`Score: ${player.score}`)
+        showInfo(20,20,"This is Main Branch(default)")
+        if(player.t <= 0){showInfo(200,20,"READY")} else {showInfo(200,20,"NOT READY")}
+        showInfo(300,20,`Score: ${player.score}`)
+        
     
-
-    for(let x of world){
-        drawRect(x)
-    }
-
-    for(let e of Entity){
-        drawRect(e)
-        drawDirection(e)
-    }
-
-    GameUpdate()
-    SpawnEnemy()
-    EntityUpdate()
-    bulletUpdate(bullet, world, Entity)
-    particleUpdate(Particles)
-
-    addMovingEvent(player);
-    Movement(player);
-    drawDirection(player)
-    playerFire(player)
-
+        for(let x of world){
+            drawRect(x)
+        }
     
-
+        for(let e of Entity){
+            drawRect(e)
+            drawDirection(e)
+        }
     
+        GameUpdate()
+        SpawnEnemy()
+        EntityUpdate()
+        bulletUpdate(bullet, world, Entity)
+        particleUpdate(Particles)
     
-    requestAnimationFrame(draw)
+        addMovingEvent(player);
+        Movement(player);
+        drawDirection(player)
+        playerFire(player)
+        
+ 
+    }, 1000 / GameSetting.FramePerSecond);
 }
-requestAnimationFrame(draw)
-
-
+ 
+draw();
