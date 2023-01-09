@@ -106,46 +106,72 @@ const border_right = {
 
 /** Clear Whole Canvas */
 function clearCanvas(){
+    ctx.beginPath()
     ctx.clearRect(0,0,canvas.width, canvas.height)
 }
 
 
 
-function addMovingEvent(object){
+// function addMovingEvent(object){
 
-    document.addEventListener('keypress', function(event){
-        if(event.key == 'w'){
-            object.movement = 'up';
-        } else if (event.key == 'a'){
-            object.movement = 'left';
-        } else if (event.key == 's'){
-            object.movement = 'down';
-        } else if (event.key == 'd'){
-            object.movement = 'right';
-        }
-    })
+//     document.addEventListener('keypress', function(event){
+        
+//         if(event.key == 'w'){
+//             object.movement = 'up';
+//         } else if (event.key == 'a'){
+//             object.movement = 'left';
+//         } else if (event.key == 's'){
+//             object.movement = 'down';
+//         } else if (event.key == 'd'){
+//             object.movement = 'right';
+//         }
+//     })
     
-    document.addEventListener('keyup', function(event){
-        if(event.key == 'w' || event.key == 'a' || event.key == 's' || event.key == 'd'){
-            object.movement = '';
-        }
-    })
+//     document.addEventListener('keyup', function(event){
+//         if(event.key == 'w' || event.key == 'a' || event.key == 's' || event.key == 'd'){
+//             object.movement = '';
+//         }
+//     })
 
     
-}
+// }
+
+document.addEventListener('keypress', function(event){
+        
+    if(event.key == 'w'){
+        player.movement = 'up';
+    } else if (event.key == 'a'){
+        player.movement = 'left';
+    } else if (event.key == 's'){
+        player.movement = 'down';
+    } else if (event.key == 'd'){
+        player.movement = 'right';
+    }
+})
+
+document.addEventListener('keyup', function(event){
+    if(event.key == 'w' || event.key == 'a' || event.key == 's' || event.key == 'd'){
+        player.movement = '';
+    }
+})
+
+
+
+
 
 function drawRect(object){
+    ctx.beginPath()
     ctx.fillStyle = `rgb(${object.c}, ${object.a})`;
     ctx.fillRect(object.x,object.y,object.w,object.h);
     
 }
 
-function drawCircle(object){
-    ctx.beginPath()
-    ctx.fillStyle = `rgb(${object.c}, ${object.a})`;
-    ctx.arc(object.x, object.y, object.r, 0, 2*Math.PI)
-    ctx.fill()
-}
+// function drawCircle(object){
+//     ctx.beginPath()
+//     ctx.fillStyle = `rgb(${object.c}, ${object.a})`;
+//     ctx.arc(object.x, object.y, object.r, 0, 2*Math.PI)
+//     ctx.fill()
+// }
 
 
 function Movement(object) {
@@ -260,6 +286,7 @@ function getHitBox(object){
 }
 
 function showInfo(x,y,info){
+    ctx.beginPath()
     ctx.fillStyle = 'black'
     ctx.fillText(String(info), x, y)
 }
@@ -421,7 +448,7 @@ function createEnemy(EnemyList){
         r : 10,
         t : 0,
         wt : Math.round(Math.random()*300),
-        health : Math.round(Math.random()*30),
+        health : Math.round(Math.random()*20) + 5,
         facing : direction,
         movement : direction,
         moveable : {up : true, down : true, left : true, right: true},
@@ -431,10 +458,10 @@ function createEnemy(EnemyList){
     function CheckOverlap(){
         for(let o of world){
             if(collision(enemy, o)){
-                console.log(enemy.x,enemy.y)
+                // console.log(enemy.x,enemy.y)
                 enemy.x = Math.floor(Math.random()*400);
                 enemy.y = Math.floor(Math.random()*400);
-                console.log(enemy.x,enemy.y)
+                // console.log(enemy.x,enemy.y)
                 CheckOverlap()
                 break
                 
@@ -681,7 +708,7 @@ function draw() {
         bulletUpdate(bullet, world, Entity)
         particleUpdate(Particles)
     
-        addMovingEvent(player);
+        // addMovingEvent(player);
         Movement(player);
         drawDirection(player)
         playerFire(player)
