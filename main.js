@@ -67,7 +67,7 @@ const border_up = {
     w : canvas.width,
     h : 5,
     a : 1,
-    c : `41, 99, 194`,
+    c : `0,0,0`,
 }
 
 const border_down = {
@@ -77,7 +77,7 @@ const border_down = {
     w : canvas.width,
     h : 5,
     a : 1,
-    c : `41, 99, 194`,
+    c : `0,0,0`,
 }
 
 const border_left = {
@@ -87,7 +87,7 @@ const border_left = {
     w : 5,
     h : canvas.height,
     a : 1,
-    c : `41, 99, 194`,
+    c : `0,0,0`,
 }
 
 const border_right = {
@@ -97,14 +97,8 @@ const border_right = {
     w : 5,
     h : canvas.height,
     a : 1,
-    c : `41, 99, 194`,
+    c : `0,0,0`,
 }
-
-world.push(border_up)
-world.push(border_down)
-world.push(border_left)
-world.push(border_right)
-
 
 /** Clear Whole Canvas */
 function clearCanvas(){
@@ -689,6 +683,10 @@ function SpawnEnemy(){
 }
 
 if(GameSetting.WorldGeneration){GenerateWorld(GameSetting.NumberOfObstacles)}
+world.push(border_up)
+world.push(border_down)
+world.push(border_left)
+world.push(border_right)
 
 function draw() {
     setTimeout(function() {
