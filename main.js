@@ -1,4 +1,5 @@
 const canvas = document.getElementById("canvas");
+canvas.style.transform = "translate3d(0,0,0)";
 const ctx = canvas.getContext("2d");
 
 //Global Variables
@@ -9,22 +10,24 @@ const world = []
 
 
 const GameSetting = {
+    WorldGeneration : true,
     NumberOfObstacles : 7,
     NumberOfEnemy : 2,
     MaxEnemy : 5,
     EnemyIncreaseRate : 1,
     FramePerSecond : 160,
+    ShowObjectName : false,
 }
 
 const player = {
     id: 'Player',
     x : 100, 
     y : 100, 
-    w : 20, //width
-    h : 20, //height
+    w : Math.round(canvas.height*0.05), //width
+    h : Math.round(canvas.height*0.05), //height
     a : 1,  // Alpha
     c : `0,198,0`,  // RGB
-    s : 1,  // Speed !!! Have to be 1
+    s : 1,  // Speed !!! 1
     health : 4,
 
     r : 10, //reload time
@@ -260,6 +263,7 @@ function getHitBox(object){
 function showInfo(x,y,info){
     ctx.beginPath()
     ctx.fillStyle = 'black'
+    ctx.font = `bold ${Math.round(canvas.height*0.033)}px serif`;
     ctx.fillText(String(info), x, y)
 }
 
@@ -272,10 +276,10 @@ function GenerateWorld(ObstacleNum){
     function GenerateObs(n){
         const obstacle = {
             id: `Obstacle${n}`,
-            x : Math.round(Math.random()*350), 
-            y : Math.round(Math.random()*350),
-            w : Math.round(Math.random()*70) + 30,
-            h : Math.round(Math.random()*70) + 30,
+            x : Math.round(Math.random()*canvas.width) - Math.round(canvas.height*0.15), 
+            y : Math.round(Math.random()*canvas.height) - Math.round(canvas.height*0.15),
+            w : Math.round(Math.random()*Math.round(canvas.height*0.222)) + Math.round(canvas.height*0.15),
+            h : Math.round(Math.random()*Math.round(canvas.height*0.222)) + Math.round(canvas.height*0.15),
             a : 1,
             c : `41, 99, 194`,
         }
@@ -316,16 +320,16 @@ function drawDirection(object){
 
     switch(object.facing){
         case "up":
-            ctx.fillRect(x - 1, y, 1, -50)
+            ctx.fillRect(x - Math.round(canvas.height*0.0025), y, Math.round(canvas.height*0.0025), -Math.round(canvas.height*0.125))
             break
         case "down":
-            ctx.fillRect(x - 1, y, 1, 50)
+            ctx.fillRect(x - Math.round(canvas.height*0.0025), y, Math.round(canvas.height*0.0025), Math.round(canvas.height*0.125))
             break
         case "left":
-            ctx.fillRect(x, y - 1, -50, 1)
+            ctx.fillRect(x, y - Math.round(canvas.height*0.0025), -Math.round(canvas.height*0.125), Math.round(canvas.height*0.0025))
             break
         case "right":
-            ctx.fillRect(x, y - 1, 50, 1)
+            ctx.fillRect(x, y - Math.round(canvas.height*0.0025), Math.round(canvas.height*0.125), Math.round(canvas.height*0.0025))
             break
     }
 }
@@ -337,10 +341,10 @@ function drawDirection(object){
  */
 function createBullet(Orgin, list){
     const bulletObj = {
-        x : Orgin.x + (Orgin.w/2) - 2.5,
-        y : Orgin.y + (Orgin.h/2) - 2.5,
-        w : 5,
-        h : 5,
+        x : Orgin.x + (Orgin.w/2) - Math.round(canvas.height*0.0125)/2,
+        y : Orgin.y + (Orgin.h/2) - Math.round(canvas.height*0.0125)/2,
+        w : Math.round(canvas.height*0.0125),
+        h : Math.round(canvas.height*0.0125),
         s : 3,
         a : 1,
         c : `0,0,0`,
@@ -427,10 +431,10 @@ function playerFire(Orgin){
 function createEnemy(EntityList){
     let direction = EnemyDrection()
     const enemy = {
-        x : Math.floor(Math.random()*400),
-        y : Math.floor(Math.random()*400),
-        w : 25,
-        h : 25,
+        x : Math.floor(Math.random()*canvas.width),
+        y : Math.floor(Math.random()*canvas.height),
+        w : Math.round(canvas.height*0.0625),
+        h : Math.round(canvas.height*0.0625),
         c : `200,0,0`,  
         s : 1, 
         a : 1,
@@ -548,8 +552,8 @@ function CreateParticles(x,y){
             a : 0.7,
             count : 0,
 
-            w : Math.random()*10,
-            h : Math.random()*10,
+            w : Math.random()*Math.round(canvas.height*0.02778),
+            h : Math.random()*Math.round(canvas.height*0.02778),
         }
         return particle
     }
@@ -684,7 +688,7 @@ function SpawnEnemy(){
     }
 }
 
-GenerateWorld(GameSetting.NumberOfObstacles)
+if(GameSetting.WorldGeneration){GenerateWorld(GameSetting.NumberOfObstacles)}
 
 function draw() {
     setTimeout(function() {
@@ -693,6 +697,9 @@ function draw() {
     
         for(let x of world){
             drawRect(x)
+            if(GameSetting.ShowObjectName){
+                showInfo(x.x + x.w/2 - Math.round(canvas.height*0.09), x.y + x.h/2, `${x.id}`)
+            }
         }
     
         for(let e of Entity){
@@ -711,9 +718,9 @@ function draw() {
         playerFire(player)
 
 
-        showInfo(20,20,"This is Main Branch(default)")
-        if(player.t <= 0){showInfo(200,20,"READY")} else {showInfo(200,20,"NOT READY")}
-        showInfo(300,20,`Score: ${player.score}`)
+        showInfo(Math.round(canvas.width*0.022) , Math.round(canvas.height*0.0333) ,"This is Main Branch(default)")
+        if(player.t <= 0){showInfo(Math.round(canvas.width*0.5555) ,Math.round(canvas.height*0.0333),"READY")} else {showInfo(Math.round(canvas.width*0.5555) ,Math.round(canvas.height*0.0333),"NOT READY")}
+        showInfo(Math.round(canvas.width*0.7777), Math.round(canvas.height*0.0333),`Score: ${player.score}`)
         
     }, 1000 / GameSetting.FramePerSecond);
 }
