@@ -1,9 +1,12 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
+//Global Variables
 const bullet = []
 const Entity = []
 const Particles = []
+const world = []
+
 
 const GameSetting = {
     NumberOfObstacles : 7,
@@ -14,7 +17,7 @@ const GameSetting = {
 }
 
 const player = {
-    id: 'box1',
+    id: 'Player',
     x : 100, 
     y : 100, 
     w : 20, //width
@@ -32,36 +35,28 @@ const player = {
     score : 0,
 }
 
-// const Obstacle1 = {
-//     id: 'Obstacle1',
-//     x : 200, 
-//     y : 200,
-//     w : 50,
-//     h : 30,
-//     a : 1,
-//     c : `198,0,0`,
-// }
+// Add Key Event for moving
+document.addEventListener('keypress', function(event){
+        
+    if(event.key == 'w'){
+        player.movement = 'up';
+    } else if (event.key == 'a'){
+        player.movement = 'left';
+    } else if (event.key == 's'){
+        player.movement = 'down';
+    } else if (event.key == 'd'){
+        player.movement = 'right';
+    }
+})
 
-// const Obstacle2 = {
-//     id: 'Obstacle2',
-//     x : 20, 
-//     y : 350,
-//     w : 30,
-//     h : 40,
-//     a : 1,
-//     c : `198,0,0`,
-// }
+// Clear the movement when release
+document.addEventListener('keyup', function(event){
+    if(event.key == 'w' || event.key == 'a' || event.key == 's' || event.key == 'd'){
+        player.movement = '';
+    }
+})
 
-// const Obstacle3 = {
-//     id: 'Obstacle3',
-//     x : 50, 
-//     y : 150,
-//     w : 120,
-//     h : 40,
-//     a : 1,
-//     c : `198,0,0`,
-// }
-
+// Create Wold Border
 const border_up = {
     id : 'border_up',
     x : 0, 
@@ -102,6 +97,10 @@ const border_right = {
     c : `41, 99, 194`,
 }
 
+world.push(border_up)
+world.push(border_down)
+world.push(border_left)
+world.push(border_right)
 
 
 /** Clear Whole Canvas */
@@ -110,54 +109,17 @@ function clearCanvas(){
     ctx.clearRect(0,0,canvas.width, canvas.height)
 }
 
-
-
-// function addMovingEvent(object){
-
-//     document.addEventListener('keypress', function(event){
-        
-//         if(event.key == 'w'){
-//             object.movement = 'up';
-//         } else if (event.key == 'a'){
-//             object.movement = 'left';
-//         } else if (event.key == 's'){
-//             object.movement = 'down';
-//         } else if (event.key == 'd'){
-//             object.movement = 'right';
-//         }
-//     })
-    
-//     document.addEventListener('keyup', function(event){
-//         if(event.key == 'w' || event.key == 'a' || event.key == 's' || event.key == 'd'){
-//             object.movement = '';
-//         }
-//     })
-
-    
-// }
-
-document.addEventListener('keypress', function(event){
-        
-    if(event.key == 'w'){
-        player.movement = 'up';
-    } else if (event.key == 'a'){
-        player.movement = 'left';
-    } else if (event.key == 's'){
-        player.movement = 'down';
-    } else if (event.key == 'd'){
-        player.movement = 'right';
-    }
-})
-
-document.addEventListener('keyup', function(event){
-    if(event.key == 'w' || event.key == 'a' || event.key == 's' || event.key == 'd'){
-        player.movement = '';
-    }
-})
-
-
-
-
+/** 
+ * Draw Rectangle with given object
+ * @param {object} object 
+ * 
+ * c -- Color (RGB);   
+ * a -- Alpha;   
+ * x -- X coordinate;   
+ * y -- Y coordinate;   
+ * w -- Width;   
+ * h -- Height;   
+ */
 
 function drawRect(object){
     ctx.beginPath()
@@ -166,20 +128,15 @@ function drawRect(object){
     
 }
 
-// function drawCircle(object){
-//     ctx.beginPath()
-//     ctx.fillStyle = `rgb(${object.c}, ${object.a})`;
-//     ctx.arc(object.x, object.y, object.r, 0, 2*Math.PI)
-//     ctx.fill()
-// }
-
-
+/**
+ * 
+ * @param {*} object Add Movement and draw the object
+ */
 function Movement(object) {
 
-    const Allobstacle = world.concat(Entity)
-    collisionDetect(object, Allobstacle)
-    // collisionDetect(object, Entity)
-    
+    // Combine all obstacles and entities
+    const Allobstacle = world.concat(Entity);
+    collisionDetect(object, Allobstacle);
     drawRect(object);
 
     if(object.movement == 'up'){
@@ -195,6 +152,12 @@ function Movement(object) {
     if(object.movement != ''){object.facing = object.movement}
 }
 
+/**
+ * 
+ * @param {Array<Number>} arr1 First Array
+ * @param {Array<Number>} arr2 Second Array
+ * @returns Boolean
+ */
 function findCommon(arr1, arr2) {
     function check(value){
         if(arr2.includes(value)){
@@ -204,6 +167,11 @@ function findCommon(arr1, arr2) {
     return arr1.some(check)
 }
 
+/**
+ * 
+ * @param {Array} array 
+ * @returns Last element of the array
+ */
 function GetLast(array){
     let len = array.length;
     return array[len-1]
@@ -212,6 +180,7 @@ function GetLast(array){
 /**
  * @param {object} object1
  * @param {object} object2
+ * @returns Boolean - If collision
  */
 function collision(object1, object2){
     let object_HB = getHitBox(object1)
@@ -226,6 +195,7 @@ function collision(object1, object2){
 }
 
 /**
+ * Detect collision between single object and the other; Using for movement
  * @param {object} object Moving object
  * @param {Array} obstacle_or Obstacles object array
  */
@@ -242,26 +212,19 @@ function collisionDetect(object, obstacle_or){
     object.moveable = {up : true, down : true, left : true, right: true}
 
     for(let obstacle of target){
+        // Saperate to X and Y components
         if(findCommon(object_HB.y, obstacle.y) && GetLast(object_HB.y) != obstacle.y[0] && GetLast(obstacle.y) != object_HB.y[0]){
-            // console.log("Y axis contact") // not in corner
-
             if(GetLast(object_HB.x) >= obstacle.x[0] && GetLast(object_HB.x) <= GetLast(obstacle.x)){
-                // console.log("left contact")
                 object.moveable.right = false;
             } else if(object_HB.x[0] <= GetLast(obstacle.x) && object_HB.x[0] >= obstacle.x[0]){
-                // console.log("Right contact")
                 object.moveable.left = false;
             }
         } 
         
         if(findCommon(object_HB.x, obstacle.x) && GetLast(object_HB.x) != obstacle.x[0] && GetLast(obstacle.x) != object_HB.x[0]){
-            // console.log("X axis contact") // not in corner
-
             if(GetLast(object_HB.y) >= obstacle.y[0] && GetLast(object_HB.y) <= GetLast(obstacle.y)){
-                // console.log("Top contact")
                 object.moveable.down = false;
             } else if(object_HB.y[0] <= GetLast(obstacle.y) && object_HB.y[0] >= obstacle.y[0]){
-                // console.log("Bottom contact")
                 object.moveable.up = false;
             }
         }
@@ -269,6 +232,11 @@ function collisionDetect(object, obstacle_or){
 
 }
 
+/**
+ * Get the hitbox of an object
+ * @param {Object} object 
+ * 
+ */
 function getHitBox(object){
 
     let X = [], Y = [];
@@ -280,17 +248,25 @@ function getHitBox(object){
         Y.push(Math.round(j))
     }
 
-    // let border = [X, Y]
-    // return border
     return {x : X, y : Y}
 }
 
+/**
+ * Write text on canvas
+ * @param {number} x 
+ * @param {number} y 
+ * @param {string} info 
+ */
 function showInfo(x,y,info){
     ctx.beginPath()
     ctx.fillStyle = 'black'
     ctx.fillText(String(info), x, y)
 }
 
+/**
+ * World Generation;
+ * @param {number} ObstacleNum 
+ */
 function GenerateWorld(ObstacleNum){
 
     function GenerateObs(n){
@@ -316,51 +292,49 @@ function GenerateWorld(ObstacleNum){
         world.push(GenerateObs(i))
     }
 }
+/**
+ * Use for testing; Show the x and y axes of an object
+ * @param {object} object 
+ */
+// function drawSaparatingAxes(object){
+//     //X
+//     ctx.fillStyle = `rgb(${object.c}, 0.5)`;
+//     ctx.fillRect(object.x, 5, object.w, 5);
 
+//     //Y
+//     ctx.fillStyle = `rgb(${object.c}, 0.5)`;
+//     ctx.fillRect(390, object.y, 5, object.h);
+// }
 
-const world = []
-
-world.push(border_up)
-world.push(border_down)
-world.push(border_left)
-world.push(border_right)
-
-
-
-
-function drawSaparatingAxes(object){
-    //ctx.fillRect(100, 5, 50, 5); y == 5 h == 5
-
-    //X
-    ctx.fillStyle = `rgb(${object.c}, 0.5)`;
-    ctx.fillRect(object.x, 5, object.w, 5);
-
-    //Y
-    ctx.fillStyle = `rgb(${object.c}, 0.5)`;
-    ctx.fillRect(390, object.y, 5, object.h);
-}
 
 function drawDirection(object){
+    let x = object.x + object.w/2;
+    let y = object.y + object.h/2;
 
     ctx.beginPath();
-    ctx.moveTo((object.x + object.w/2), (object.y + object.h/2))
+    ctx.fillStyle = "black"
+
     switch(object.facing){
         case "up":
-            ctx.lineTo((object.x + object.w/2), (object.y + object.h/2) - 50)
+            ctx.fillRect(x - 1, y, 1, -50)
             break
         case "down":
-            ctx.lineTo((object.x + object.w/2), (object.y + object.h/2) + 50)
+            ctx.fillRect(x - 1, y, 1, 50)
             break
         case "left":
-            ctx.lineTo((object.x + object.w/2) - 50, (object.y + object.h/2))
+            ctx.fillRect(x, y - 1, -50, 1)
             break
         case "right":
-            ctx.lineTo((object.x + object.w/2) + 50, (object.y + object.h/2))
+            ctx.fillRect(x, y - 1, 50, 1)
             break
     }
-    ctx.stroke()
 }
 
+/**
+ * Creat a bullet
+ * @param {object} Orgin Who shoot this bullet 
+ * @param {list} list The Bullet list
+ */
 function createBullet(Orgin, list){
     const bulletObj = {
         x : Orgin.x + (Orgin.w/2) - 2.5,
@@ -376,7 +350,11 @@ function createBullet(Orgin, list){
     list.push(bulletObj)
 }
 
-function bulletUpdate(BulletList, obstacle1, obstacle2){
+/**
+ * Movement of the bullet
+ * @param {list<object>} BulletList 
+ */
+function bulletUpdate(BulletList){
     for(let i = 0; i <= BulletList.length - 1; i++){
 
         switch(BulletList[i].d){
@@ -398,6 +376,10 @@ function bulletUpdate(BulletList, obstacle1, obstacle2){
     }
 }
 
+/**
+ * Player Fire with timer for reload
+ * @param {object} Orgin The player 
+ */
 function playerFire(Orgin){
     document.addEventListener("keydown", function(event){
         if(event.key === 'j' && Orgin.t <= 0){
@@ -413,6 +395,10 @@ function playerFire(Orgin){
     
 }
 
+/**
+ * For testing; Creating dummy
+ * @param {list} EnemyList Entity list 
+ */
 // function createDummy(x, y ,health, movement){
 //     let dummy = {
 //         x : x,
@@ -434,7 +420,11 @@ function playerFire(Orgin){
 //     Entity.push(dummy)
 // }
 
-function createEnemy(EnemyList){
+/**
+ * Create Enemy
+ * @param {list} EntityList Entity list
+ */
+function createEnemy(EntityList){
     let direction = EnemyDrection()
     const enemy = {
         x : Math.floor(Math.random()*400),
@@ -455,13 +445,12 @@ function createEnemy(EnemyList){
 
     }
 
+    // Check for overlaping and respawn the enemy
     function CheckOverlap(){
         for(let o of world){
             if(collision(enemy, o)){
-                // console.log(enemy.x,enemy.y)
                 enemy.x = Math.floor(Math.random()*400);
                 enemy.y = Math.floor(Math.random()*400);
-                // console.log(enemy.x,enemy.y)
                 CheckOverlap()
                 break
                 
@@ -470,11 +459,12 @@ function createEnemy(EnemyList){
     }
 
     CheckOverlap()
-
-    // console.log(enemy.x, enemy.y, direction)
-    EnemyList.push(enemy)
+    EntityList.push(enemy)
 }
 
+/**
+ * @returns Random direction for enemy
+ */
 function EnemyDrection(){
     let Random = Math.random()
     let direction = ""
@@ -492,10 +482,15 @@ function EnemyDrection(){
     return direction
 }
 
-// function EnemyFire(Enemy){ //Future Update
+//Future Update
+// function EnemyFire(Enemy){ 
 // }
 
-
+/**
+ * HitAnimation
+ * @param {object} Entity 
+ * @param {number} scale 
+ */
 function hitAnimation(Entity, scale=2){
     
     function scaleUp(Entity){
@@ -515,7 +510,6 @@ function hitAnimation(Entity, scale=2){
     let count = 0
 
     function animation(){
-        // console.log("hit")
         if(count < scale){
             scaleUp(Entity);
         } else if(count >= scale){
@@ -528,10 +522,14 @@ function hitAnimation(Entity, scale=2){
     requestAnimationFrame(animation)
 }
 
+/**
+ * Creating particles for visual effect
+ * @param {number} x Center for the particle effect 
+ * @param {number} y Center for the particle effect 
+ */
 function CreateParticles(x,y){
     
-    // const Particles = []
-
+    //True Random Generate both negitive and positive number
     function Trandom(){
         if(Math.random() < 0.5){
             return -1*Math.random()
@@ -546,7 +544,6 @@ function CreateParticles(x,y){
             y : y,
             vx : Trandom() * 0.3,
             vy : Trandom() * 0.3,
-            // r : Math.random() * 2,
             c : `${Math.random()*100},${Math.random()*100},${Math.random()*255}`,
             a : 0.7,
             count : 0,
@@ -564,13 +561,16 @@ function CreateParticles(x,y){
     
 }
 
+/**
+ * Update the particles
+ * @param {list} particles 
+ */
 function particleUpdate(particles){
     for(let i = 0; i < particles.length; i+=1){
         if(particles[i].count < 50){
             particles[i].x += particles[i].vx
             particles[i].y += particles[i].vy
             particles[i].a -= 0.01
-            // drawCircle(particles[i])
             drawRect(particles[i])
             particles[i].count += 1
         } else {
@@ -579,11 +579,10 @@ function particleUpdate(particles){
     }
 }
 
+/**
+ * Update Entity movement 
+ */
 function EntityUpdate(){
-    // const Obs = world.concat(Entity)
-    // const Obs = []
-    // Obs.push(player)
-
     for(let e = 0; e<Entity.length; e+=1){
         let en = Entity.slice(0,e).concat(world)
         let Obs = en.concat(Entity.slice(e+1, Entity.length))
@@ -602,8 +601,6 @@ function EntityUpdate(){
                 }else if(Entity[e].moveable.down == false){
                     Entity[e].movement = "up"
                 }
-
-                // console.log(Entity[e].movement, Entity[e].facing)
             }
 
         }
@@ -633,6 +630,11 @@ function EntityUpdate(){
     }
 }
 
+/**
+ * Update Game
+ * Update Damage and health
+ * Executing hit animation and particle effect
+ */
 function GameUpdate(){
     for(let w = 0; w < world.length; w+=1){
         for(let b = 0; b < bullet.length; b+=1){
@@ -652,7 +654,7 @@ function GameUpdate(){
                 CreateParticles((bullet[b].x + bullet[b].w/2),(bullet[b].y + bullet[b].h/2))
 
                 if(Entity[e].health <= bullet[b].damage){
-                    // console.log(e, Entity[e])
+
                     Entity.splice(e,1)
 
                     player.score += 5
@@ -667,7 +669,7 @@ function GameUpdate(){
     }
 }
 
-GenerateWorld(GameSetting.NumberOfObstacles)
+
 
 function SpawnEnemy(){
     if(Entity.length == 0){
@@ -681,17 +683,13 @@ function SpawnEnemy(){
         
     }
 }
- 
+
+GenerateWorld(GameSetting.NumberOfObstacles)
+
 function draw() {
     setTimeout(function() {
         requestAnimationFrame(draw);
- 
         clearCanvas()
-    
-        showInfo(20,20,"This is Main Branch(default)")
-        if(player.t <= 0){showInfo(200,20,"READY")} else {showInfo(200,20,"NOT READY")}
-        showInfo(300,20,`Score: ${player.score}`)
-        
     
         for(let x of world){
             drawRect(x)
@@ -708,12 +706,15 @@ function draw() {
         bulletUpdate(bullet, world, Entity)
         particleUpdate(Particles)
     
-        // addMovingEvent(player);
         Movement(player);
         drawDirection(player)
         playerFire(player)
+
+
+        showInfo(20,20,"This is Main Branch(default)")
+        if(player.t <= 0){showInfo(200,20,"READY")} else {showInfo(200,20,"NOT READY")}
+        showInfo(300,20,`Score: ${player.score}`)
         
- 
     }, 1000 / GameSetting.FramePerSecond);
 }
  
